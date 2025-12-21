@@ -55,9 +55,7 @@ const Signup = () => {
     return (
         <div className="flex justify-center items-center min-h-screen">
             <div className="flex flex-col items-center">
-                <h1 className="font-medium text-2xl underline">
-                    {loading ? "Loading..." : "Signup"}
-                </h1>
+                <h1 className="font-medium text-2xl underline">Signup</h1>
                 <label htmlFor="username" className="mt-2">
                     Username
                 </label>
