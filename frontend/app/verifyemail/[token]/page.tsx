@@ -10,7 +10,7 @@ const VerifyEmail = () => {
     const [token, setToken] = useState("");
     const [response, setResponse] = useState("");
 
-    const VerifyEmail = async () => {
+    const verifyEmailRequest = async () => {
         try {
             const res = await api.post("/auth/verifyemail", { token });
             setResponse(res.data.message);
@@ -26,13 +26,15 @@ const VerifyEmail = () => {
     };
 
     useEffect(() => {
-        const urlToken = params.token as string;
-        setToken(urlToken);
-    }, []);
+        if (params.token) {
+            const urlToken = params.token as string;
+            setToken(urlToken);
+        }
+    }, [params]);
 
     useEffect(() => {
         if (token.length > 0) {
-            VerifyEmail();
+            verifyEmailRequest();
         }
     }, [token]);
 
