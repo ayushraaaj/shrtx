@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { IUser } from "./user.types";
 import jwt from "jsonwebtoken";
 import {
     ACCESS_TOKEN_EXPIRY,
@@ -8,6 +7,7 @@ import {
     REFRESH_TOKEN_EXPIRY,
     REFRESH_TOKEN_SECRET,
 } from "../config/env";
+import { IUser } from "../interfaces/IUser";
 
 const userSchema = new mongoose.Schema<IUser>(
     {

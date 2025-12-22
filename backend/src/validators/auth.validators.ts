@@ -37,12 +37,8 @@ export const signupValidator = () => {
             .notEmpty()
             .withMessage("Password is required")
             .bail()
-            .isStrongPassword({
-                minLength: 5,
-                // minLowercase: 1,
-                // minUppercase: 1,
-                // minNumbers: 1,
-                // minSymbols: 1,
+            .isLength({
+                min: 5,
             })
             .withMessage(
                 "Password must contain uppercase, lowercase, number, and special character"

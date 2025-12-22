@@ -1,5 +1,6 @@
 "use client";
 import { api } from "@/lib/axios";
+import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -31,8 +32,14 @@ const Signup = () => {
             const res = await api.post("/auth/signup", user);
 
             setResponse(res.data.message);
-        } catch (error: any) {
-            setResponse(error.response.data.message);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                setResponse(
+                    error?.response?.data.message ?? "Something went wrong"
+                );
+            } else {
+                setResponse("Unexpected error");
+            }
         } finally {
             setLoading(false);
             setButtonDisabled(false);

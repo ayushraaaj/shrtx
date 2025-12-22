@@ -3,7 +3,10 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { User } from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
-import { IUser } from "../models/user.types";
+import crypto from "crypto";
+import { emailVerificationMailgenContent, sendEmail } from "../utils/mail";
+import { IUser } from "../interfaces/IUser";
+import { CLIENT_URL } from "../config/env";
 
 const generateAccessAndRefreshToken = async (user: IUser) => {
     try {
@@ -19,6 +22,15 @@ const generateAccessAndRefreshToken = async (user: IUser) => {
     }
 };
 
+const generateVerificationToken = () => {
+    // randomBytes(5) → generates 5 bytes
+    // Each byte becomes 2 hex characters
+    // 5 × 2 = 10 characters
+
+    const token = crypto.randomBytes(15).toString("hex");
+    return token;
+};
+
 export const signupUser = asyncHandler(async (req: Request, res: Response) => {
     const { username, email, fullname, password } = req.body;
 
@@ -30,8 +42,23 @@ export const signupUser = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(409, "User with username or email already exists");
     }
 
-    const user = new User(req.body);
-    await user.save();
+    const user = await User.create({ username, email, fullname, password });
+
+    const hashedToken = generateVerificationToken();
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+        email: user.email,
+        subject: "Please verify your email",
+        mailgenContent: emailVerificationMailgenContent(
+            user.fullname,
+            `${CLIENT_URL}/verifyemail/${hashedToken}`
+        ),
+    });
 
     const createdUser = await User.findById(user._id).select(
         "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry -refreshToken"
@@ -87,3 +114,27 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
             })
         );
 });
+
+export const verifyUserEmail = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { token } = req.body;
+
+        const user = await User.findOne({
+            emailVerificationToken: token,
+            emailVerificationExpiry: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            throw new ApiError(401, "Verification token is invalid or expired");
+        }
+
+        user.isEmailVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpiry = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Email successfully verified", {}));
+    }
+);
