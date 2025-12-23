@@ -34,3 +34,5 @@ export const MAILTRAP_SMTP_USER = getEnv("MAILTRAP_SMTP_USER");
 export const MAILTRAP_SMTP_PASS = getEnv("MAILTRAP_SMTP_PASS");
 
 export const CLIENT_URL = getEnv("CLIENT_URL");
+export const BACKEND_URL = getEnv("BACKEND_URL");
+

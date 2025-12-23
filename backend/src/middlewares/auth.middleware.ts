@@ -18,12 +18,12 @@ export const verifyJWT = asyncHandler(
                 token,
                 ACCESS_TOKEN_SECRET
             ) as JwtPayload;
-    
+
             const user = await User.findById(decodedToken?._id);
             if (!user) {
                 throw new ApiError(401, "Invalid access token");
             }
-    
+
             req.user = user;
         } catch (error) {
             throw new ApiError(401, "Invalid access token");

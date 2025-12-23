@@ -9,5 +9,8 @@
         "dev:backend": "cd backend && npm run dev"
     },
     "author": "Ayush Raj",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "cookie-parser": "^1.4.7"
+    }
 }

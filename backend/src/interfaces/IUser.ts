@@ -8,7 +8,7 @@ export interface IUser extends Document {
     isAdmin: boolean;
     isEmailVerified: boolean;
     notificationsAllowed: boolean;
-
+    
     emailVerificationToken?: string | null;
     emailVerificationExpiry?: Date | null;
     forgotPasswordToken?: string | null;
