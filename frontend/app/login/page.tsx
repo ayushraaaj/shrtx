@@ -2,9 +2,12 @@
 import { api } from "@/lib/axios";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Login = () => {
+    const router = useRouter();
+
     const [user, setUser] = useState({ username_email: "", password: "" });
     const [buttonDisabled, setButtonDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -17,6 +20,7 @@ const Login = () => {
             const res = await api.post("/auth/login", user);
 
             setResponse(res.data.message);
+            router.push("/dashboard");
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setResponse(
