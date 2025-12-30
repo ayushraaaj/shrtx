@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Header from "@/components/header/Header";
+import Footer from "@/components/footer/Footer";
 
 export default function DemoPage() {
     const [url, setUrl] = useState("");
@@ -23,20 +24,6 @@ export default function DemoPage() {
 
     return (
         <div className="min-h-screen bg-zinc-50 text-zinc-900 font-sans">
-            {/* <nav className="border-b border-zinc-200 bg-white p-4">
-                <div className="max-w-5xl mx-auto flex justify-between items-center">
-                    <Link href="/" className="font-bold text-blue-600">
-                        SHRTX_DEMO
-                    </Link>
-                    <Link
-                        href="/signup"
-                        className="text-sm font-semibold bg-zinc-900 text-white px-4 py-2 rounded-md"
-                    >
-                        Create Account
-                    </Link>
-                </div>
-            </nav> */}
-
             <Header />
 
             <main className="max-w-3xl mx-auto pt-16 px-6">

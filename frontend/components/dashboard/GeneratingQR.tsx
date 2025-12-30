@@ -225,8 +225,7 @@ const GeneratingQR = ({ shortUrl, qrGenerated }: Props) => {
     return (
         <div className="flex items-center gap-2">
             {showQR ? (
-                <>
-                    {/* Small Preview - Click to Zoom */}
+                <div>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="group relative p-1 bg-white border border-zinc-200 rounded-lg hover:border-blue-500 transition-all shadow-sm"
@@ -237,7 +236,6 @@ const GeneratingQR = ({ shortUrl, qrGenerated }: Props) => {
                         </div>
                     </button>
 
-                    {/* SCANNABLE MODAL OVERLAY */}
                     {isModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full relative animate-in zoom-in duration-300">
@@ -260,7 +258,7 @@ const GeneratingQR = ({ shortUrl, qrGenerated }: Props) => {
                                         <QRCodeCanvas
                                             ref={canvasRef}
                                             value={shortUrl}
-                                            size={200} // LARGE SIZE FOR SCANNING
+                                            size={200}
                                             level="H"
                                         />
                                     </div>
@@ -276,7 +274,7 @@ const GeneratingQR = ({ shortUrl, qrGenerated }: Props) => {
                             </div>
                         </div>
                     )}
-                </>
+                </div>
             ) : (
                 <button
                     onClick={onGenerateQR}

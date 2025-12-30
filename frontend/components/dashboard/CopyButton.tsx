@@ -28,8 +28,8 @@ const CopyButton = (props: Props) => {
     return (
         <div>
             <button
+                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 hover:bg-blue-50 text-zinc-600 hover:text-blue-600 border border-zinc-200 hover:border-blue-200 rounded-lg text-xs font-bold transition-all cursor-pointer"
                 onClick={onCopy}
-                className={"border px-2 py-1 text-xs rounded mt-2 cursor-pointer"}
             >
                 {copied ? "Copied!" : "Copy"}
             </button>

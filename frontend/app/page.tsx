@@ -1,3 +1,4 @@
+import Footer from "@/components/footer/Footer";
 import Header from "@/components/header/Header";
 import Link from "next/link";
 
@@ -41,10 +42,7 @@ export default function Home() {
                 </p>
             </main>
 
-            <footer className="w-full py-8 border-t border-zinc-200 flex justify-center text-zinc-400 text-xs">
-                &copy; {new Date().getFullYear()} Shrtx Inc.
-            </footer>
+            <Footer />
         </div>
     );
 }
-
