@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { IUrl } from "../interfaces/IUrl";
 
-const urlSchema = new mongoose.Schema(
+const urlSchema = new mongoose.Schema<IUrl>(
     {
         shortCode: {
             type: String,
@@ -15,7 +16,7 @@ const urlSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-            index: true
+            index: true,
         },
         clicks: {
             type: Number,
@@ -32,4 +33,4 @@ const urlSchema = new mongoose.Schema(
 
 urlSchema.index({ owner: 1, createdAt: -1 });
 
-export const Url = mongoose.model("urls", urlSchema);
+export const Url = mongoose.model<IUrl>("urls", urlSchema);

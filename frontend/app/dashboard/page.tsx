@@ -5,16 +5,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import UrlTable from "@/components/dashboard/UrlTable";
 import CopyButton from "@/components/dashboard/CopyButton";
+import { UrlApiItem } from "../interfaces/url";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState({ message: "", shortUrl: "" });
     const [buttonDisabled, setButtonDisabled] = useState(true);
-    const [urls, setUrls] = useState([]);
+    const [urls, setUrls] = useState<UrlApiItem[]>([]);
 
     const [page, setPage] = useState(1);
     const [isRemaining, setIsRemaining] = useState(true);
+
+    const [searchText, setSearchText] = useState("");
 
     const isValidUrl = (originalUrl: string) => {
         try {
@@ -65,16 +68,27 @@ const Dashboard = () => {
 
         try {
             setLoading(true);
-            const res = await api.get(`/url/get-all?page=${pageNumber}`);
+            const res = await api.get(
+                `/url/get-all?page=${pageNumber}&search=${searchText}`
+            );
 
             const urlsData = res.data.data.urls;
             const totalPages = res.data.data.pagination.totalPages;
 
-            setUrls((prev) =>
-                pageNumber === 1 ? urlsData : [...prev, ...urlsData]
-            );
+            setUrls((prev) => {
+                if (pageNumber === 1) {
+                    return urlsData;
+                }
 
-            if (pageNumber >= totalPages) {
+                const existingIds = new Set(prev.map((url) => url._id));
+                const uniqueIds = urlsData.filter(
+                    (url: UrlApiItem) => !existingIds.has(url._id)
+                );
+
+                return [...prev, ...uniqueIds];
+            });
+
+            if (urlsData.length < 5) {
                 setIsRemaining(false);
             }
         } catch (error) {
@@ -98,8 +112,10 @@ const Dashboard = () => {
     }, [originalUrl]);
 
     useEffect(() => {
+        setPage(1);
+        setIsRemaining(true);
         fetchAllUrls(1);
-    }, []);
+    }, [searchText]);
 
     return (
         <div>
@@ -152,6 +168,16 @@ const Dashboard = () => {
                     )}
                 </div>
                 <div className="w-[50%] mr-10 mt-5 h-[78vh] overflow-y-auto">
+                    <div>
+                        <input
+                            className="border outline-none p-2 rounded-lg w-[50%] mb-3"
+                            type="text"
+                            placeholder="Search Urls..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                        />
+                    </div>
+
                     <UrlTable urls={urls} />
                     <div className="flex justify-center mt-2">
                         {isRemaining && (

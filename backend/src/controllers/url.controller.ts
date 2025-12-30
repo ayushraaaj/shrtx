@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { Url } from "../models/url.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import { BACKEND_URL, CLIENT_URL } from "../config/env";
+import { UrlQuery } from "../interfaces/IUrl";
 
 const isValidUrl = (url: string) => {
     try {
@@ -85,11 +86,26 @@ export const getAllUrlDetails = asyncHandler(
     async (req: Request, res: Response) => {
         const userId = req.user?._id;
 
+        if (!userId) {
+            throw new ApiError(401, "Unauthorized");
+        }
+
         const page = Number(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
 
-        const urls = await Url.find({ owner: userId })
+        const search = req.query.search as string || undefined;
+
+        const query: UrlQuery = { owner: userId };
+
+        if (search) {
+            query.$or = [
+                { originalUrl: { $regex: search, $options: "i" } },
+                { shortCode: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        const urls = await Url.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
