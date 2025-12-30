@@ -85,12 +85,30 @@ export const getAllUrlDetails = asyncHandler(
     async (req: Request, res: Response) => {
         const userId = req.user?._id;
 
-        const urls = await Url.find({ owner: userId }).lean();
+        const page = Number(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
 
-        const urlsData = urls.map((url) => ({
-            ...url,
-            shortUrl: `${BACKEND_URL}/${url.shortCode}`,
-        }));
+        const urls = await Url.find({ owner: userId })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const totalUrls = await Url.countDocuments({ owner: userId });
+
+        const urlsData = {
+            urls: urls.map((url) => ({
+                ...url,
+                shortUrl: `${BACKEND_URL}/${url.shortCode}`,
+            })),
+            pagination: {
+                currentPage: page,
+                limit,
+                totalUrls,
+                totalPages: Math.ceil(totalUrls / limit),
+            },
+        };
 
         return res
             .status(200)

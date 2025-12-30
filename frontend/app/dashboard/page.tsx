@@ -11,8 +11,10 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState({ message: "", shortUrl: "" });
     const [buttonDisabled, setButtonDisabled] = useState(true);
-
     const [urls, setUrls] = useState([]);
+
+    const [page, setPage] = useState(1);
+    const [isRemaining, setIsRemaining] = useState(true);
 
     const isValidUrl = (originalUrl: string) => {
         try {
@@ -38,7 +40,9 @@ const Dashboard = () => {
                 shortUrl: res.data.data,
             });
 
-            fetchAllUrls();
+            setIsRemaining(true);
+            setPage(1);
+            fetchAllUrls(1);
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setResponse({
@@ -54,11 +58,35 @@ const Dashboard = () => {
         }
     };
 
-    const fetchAllUrls = async () => {
+    const fetchAllUrls = async (pageNumber: number) => {
+        if (loading || !isRemaining) {
+            return;
+        }
+
         try {
-            const res = await api.get("/url/get-all");
-            setUrls(res.data.data);
-        } catch (error) {}
+            setLoading(true);
+            const res = await api.get(`/url/get-all?page=${pageNumber}`);
+
+            const urlsData = res.data.data.urls;
+            const totalPages = res.data.data.pagination.totalPages;
+
+            setUrls((prev) =>
+                pageNumber === 1 ? urlsData : [...prev, ...urlsData]
+            );
+
+            if (pageNumber >= totalPages) {
+                setIsRemaining(false);
+            }
+        } catch (error) {
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchAllUrls(nextPage);
     };
 
     useEffect(() => {
@@ -70,7 +98,7 @@ const Dashboard = () => {
     }, [originalUrl]);
 
     useEffect(() => {
-        fetchAllUrls();
+        fetchAllUrls(1);
     }, []);
 
     return (
@@ -125,6 +153,16 @@ const Dashboard = () => {
                 </div>
                 <div className="w-[50%] mr-10 mt-5 h-[78vh] overflow-y-auto">
                     <UrlTable urls={urls} />
+                    <div className="flex justify-center mt-2">
+                        {isRemaining && (
+                            <button
+                                className="border px-2 py-1 text-xs rounded cursor-pointer"
+                                onClick={loadMore}
+                            >
+                                {loading ? "Loading..." : "Load More"}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
