@@ -1,5 +1,10 @@
 import { UrlApiItem } from "@/app/interfaces/url";
 import UrlTableRow from "./UrlTableRow";
+import {
+    LinkIcon,
+    QrCodeIcon,
+    ChartBarIcon,
+} from "@heroicons/react/24/outline";
 
 interface Props {
     urls: UrlApiItem[];
@@ -8,28 +13,45 @@ interface Props {
 const UrlTable = (props: Props) => {
     const { urls } = props;
 
-    if (urls.length == 0) {
-        return <p className="text-sm text-gray-500">No URLs yet.</p>;
-    }
+    if (urls.length === 0) return null;
 
     return (
-        <div className="overflow-x-auto border rounded">
-            <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th className="p-3 text-left">Original URL</th>
-                        <th className="p-3 text-left">Short URL</th>
-                        <th className="p-3 text-left">QR Code</th>
-                        <th className="p-3 text-right">Clicks</th>
-                    </tr>
-                </thead>
+        <div className="relative overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                                <div className="flex items-center justify-center gap-2">
+                                    <LinkIcon className="w-4 h-4" />
+                                    Source Destination
+                                </div>
+                            </th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
+                                Short URL
+                            </th>
+                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                                <div className="flex items-center justify-center gap-2">
+                                    <QrCodeIcon className="w-4 h-4" />
+                                    QR Code
+                                </div>
+                            </th>
+                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                                <div className="flex items-center justify-center gap-2">
+                                    <ChartBarIcon className="w-4 h-4" />
+                                    Engagement
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    {urls.map((url) => (
-                        <UrlTableRow key={url._id} url={url} />
-                    ))}
-                </tbody>
-            </table>
+                    <tbody className="divide-y divide-zinc-100 bg-white">
+                        {urls.map((url) => (
+                            <UrlTableRow key={url._id} url={url} />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

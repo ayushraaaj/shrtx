@@ -16,15 +16,17 @@ const Login = () => {
     const onLogin = async () => {
         try {
             setLoading(true);
-
+            setResponse("");
             const res = await api.post("/auth/login", user);
-
             setResponse(res.data.message);
-            router.push("/dashboard");
+
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 1000);
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setResponse(
-                    error?.response?.data.message ?? "Something went wrong"
+                    error?.response?.data.message ?? "Invalid credentials"
                 );
             } else {
                 setResponse("Unexpected error");
@@ -43,58 +45,99 @@ const Login = () => {
     }, [user]);
 
     return (
-        <div className="flex justify-center items-center min-h-screen">
-            <div className="flex flex-col items-center">
-                <h1 className="font-medium text-2xl underline">Login</h1>
-                <label htmlFor="username" className="mt-2">
-                    Username/email
-                </label>
-                <input
-                    className="border outline-none p-2 rounded-lg"
-                    type="text"
-                    id="username"
-                    value={user.username_email}
-                    onChange={(e) =>
-                        setUser({ ...user, username_email: e.target.value })
-                    }
-                    placeholder="Username or email"
-                />
+        <div className="min-h-screen bg-zinc-50 flex flex-col justify-center items-center px-4">
+            <Link href="/" className="mb-8 text-2xl font-bold text-blue-600">
+                shrtx<span className="text-zinc-400">.</span>
+            </Link>
 
-                <label htmlFor="password" className="mt-2">
-                    Password
-                </label>
-                <input
-                    className="border outline-none p-2 rounded-lg"
-                    type="password"
-                    id="password"
-                    value={user.password}
-                    onChange={(e) =>
-                        setUser({ ...user, password: e.target.value })
-                    }
-                    placeholder="Password"
-                />
+            <div className="w-full max-w-md bg-white border border-zinc-200 p-8 rounded-2xl shadow-sm">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-zinc-900">
+                        Welcome back
+                    </h1>
+                    <p className="text-zinc-500 text-sm">
+                        Sign in to manage your short links.
+                    </p>
+                </div>
 
-                <button
-                    className={`border bg-gray-200  ${
-                        buttonDisabled ? "" : `hover:bg-gray-400`
-                    } rounded-lg p-2 mt-3 cursor-pointer`}
-                    onClick={onLogin}
-                    disabled={buttonDisabled}
-                >
-                    {loading ? "Submitting..." : "Login"}
-                </button>
-                <Link
-                    className="mt-3 text-blue-500 focus:text-red-500 underline"
-                    href="/signup"
-                >
-                    Visit signup page here
-                </Link>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                            Username or Email
+                        </label>
+                        <input
+                            className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
+                            type="text"
+                            value={user.username_email}
+                            onChange={(e) =>
+                                setUser({
+                                    ...user,
+                                    username_email: e.target.value,
+                                })
+                            }
+                            placeholder="Enter your username"
+                        />
+                    </div>
+
+                    <div>
+                        <div className="flex justify-between mb-1">
+                            <label className="text-sm font-semibold text-zinc-700">
+                                Password
+                            </label>
+                            <Link
+                                href="#"
+                                className="text-xs text-blue-600 hover:underline"
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
+                        <input
+                            className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
+                            type="password"
+                            value={user.password}
+                            onChange={(e) =>
+                                setUser({ ...user, password: e.target.value })
+                            }
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    <button
+                        className={`w-full py-3.5 rounded-xl font-bold transition-all mt-2 ${
+                            buttonDisabled || loading
+                                ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                                : "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 active:scale-[0.98]"
+                        }`}
+                        onClick={onLogin}
+                        disabled={buttonDisabled || loading}
+                    >
+                        {loading ? "Signing in..." : "Login"}
+                    </button>
+                </div>
 
                 {response && (
-                    <h1 className="font-medium text-2xl underline">
+                    <div
+                        className={`mt-4 p-3 rounded-lg text-sm font-medium text-center border ${
+                            response.toLowerCase().includes("success")
+                                ? "bg-green-50 text-green-600 border-green-100"
+                                : "bg-red-50 text-red-600 border-red-100"
+                        }`}
+                    >
                         {response}
-                    </h1>
+                    </div>
                 )}
+
+                <div className="mt-6 text-center">
+                    <p className="text-zinc-500 text-sm">
+                        Don&apos;t have an account?{" "}
+                        <Link
+                            href="/signup"
+                            className="text-blue-600 font-semibold hover:underline"
+                        >
+                            Create one
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
