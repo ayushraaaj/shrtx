@@ -13,6 +13,7 @@ import {
     InformationCircleIcon,
     CheckCircleIcon,
 } from "@heroicons/react/24/outline";
+import Logout from "@/components/logout/Logout";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -55,10 +56,15 @@ const Dashboard = () => {
             setPage(1);
             fetchAllUrls(1);
         } catch (error: unknown) {
-            const errorMsg = axios.isAxiosError(error)
-                ? error.response?.data.message
-                : "Unexpected Error";
-            setResponse({ message: errorMsg, shortUrl: "" });
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
+            }
         } finally {
             setLoading(false);
         }
@@ -83,8 +89,16 @@ const Dashboard = () => {
             });
 
             if (urlsData.length < 5) setIsRemaining(false);
-        } catch (error) {
-            console.error("Failed to fetch URLs", error);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
+            }
         } finally {
             setLoading(false);
         }
@@ -94,6 +108,55 @@ const Dashboard = () => {
         const nextPage = page + 1;
         setPage(nextPage);
         fetchAllUrls(nextPage);
+    };
+
+    const onToggleStatus = async (urlId: string) => {
+        try {
+            const res = await api.patch(`/url/${urlId}/togglestatus`);
+
+            const newStatus = res.data.data.isActive;
+
+            setUrls((prev) =>
+                prev.map((url) =>
+                    url._id === urlId ? { ...url, isActive: newStatus } : url
+                )
+            );
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
+            }
+        }
+    };
+
+    const onDeleteUrl = async (urlId: string) => {
+        const confirmDelete = confirm(
+            "Are you sure you want to delete this URL?"
+        );
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            await api.delete(`/url/${urlId}/delete`);
+
+            setUrls((prev) => prev.filter((url) => url._id !== urlId));
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Something went wrong", shortUrl: "" });
+            }
+        }
     };
 
     useEffect(() => {
@@ -119,25 +182,7 @@ const Dashboard = () => {
                         </p>
                     </div>
 
-                    <button
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 font-bold text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all cursor-pointer active:scale-95"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={2}
-                            stroke="currentColor"
-                            className="w-4 h-4"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-                            />
-                        </svg>
-                        Logout
-                    </button>
+                    <Logout logoutResponse={(message:string)=> setResponse({message, shortUrl: ""})} />
                 </header>
 
                 <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">
@@ -254,8 +299,12 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    <div className="min-h-[300px]">
-                        <UrlTable urls={urls} />
+                    <div className="min-h-75">
+                        <UrlTable
+                            urls={urls}
+                            onToggleStatus={onToggleStatus}
+                            onDeleteUrl={onDeleteUrl}
+                        />
 
                         {urls.length === 0 && !loading && (
                             <div className="py-20 flex flex-col items-center text-center">

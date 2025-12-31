@@ -50,9 +50,13 @@ export const openShortUrl = asyncHandler(
         const { shortCode } = req.params;
 
         const urlDoc = await Url.findOne({ shortCode });
-        if (!urlDoc) {
+        if (!urlDoc || !urlDoc.isActive) {
             return res.redirect(`${CLIENT_URL}/404`);
         }
+
+        // if (!urlDoc.isActive) {
+        //     throw new ApiError(400, "Unauthorized");
+        // }
 
         urlDoc.clicks += 1;
         urlDoc.save({ validateBeforeSave: false });
@@ -94,7 +98,7 @@ export const getAllUrlDetails = asyncHandler(
         const limit = 5;
         const skip = (page - 1) * limit;
 
-        const search = req.query.search as string || undefined;
+        const search = (req.query.search as string) || undefined;
 
         const query: UrlQuery = { owner: userId };
 
@@ -131,3 +135,47 @@ export const getAllUrlDetails = asyncHandler(
             .json(new ApiResponse("URLs fetched successfully", urlsData));
     }
 );
+
+export const toggleUrlStatus = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const urlId = req.params.id;
+
+        if (!userId) {
+            throw new ApiError(401, "Unauthorized");
+        }
+
+        const urlDoc = await Url.findOne({ _id: urlId, owner: userId });
+        if (!urlDoc) {
+            throw new ApiError(404, "URL not found");
+        }
+
+        urlDoc.isActive = !urlDoc.isActive;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse("Status updated", { isActive: urlDoc.isActive })
+            );
+    }
+);
+
+export const deleteUrl = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+    const urlId = req.params.id;
+
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const deletedUrl = await Url.findOneAndDelete({
+        _id: urlId,
+        owner: userId,
+    });
+    if (!deletedUrl) {
+        throw new ApiError(404, "URL not found");
+    }
+
+    return res.status(200).json(new ApiResponse("Deleted successfully", {}));
+});

@@ -27,6 +27,10 @@ const urlSchema = new mongoose.Schema<IUrl>(
             default: false,
         },
         qrGeneratedAt: Date,
+        isActive: {
+            type: Boolean,
+            default: true
+        }
     },
     { timestamps: true }
 );

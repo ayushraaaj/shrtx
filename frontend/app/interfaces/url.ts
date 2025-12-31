@@ -10,4 +10,5 @@ export interface UrlApiItem {
     __v: number;
     qrGeneratedAt: string;
     shortUrl: string;
+    isActive: boolean
 }

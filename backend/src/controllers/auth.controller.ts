@@ -138,3 +138,19 @@ export const verifyUserEmail = asyncHandler(
             .json(new ApiResponse("Email successfully verified", {}));
     }
 );
+
+export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+
+    await User.findByIdAndUpdate(userId, { $set: { refreshToken: undefined } });
+
+    const options = {
+        httpOnly: true,
+    };
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse("Logout successful", {}));
+});

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     loginUser,
+    logoutUser,
     signupUser,
     verifyUserEmail,
 } from "../controllers/auth.controller";
@@ -14,6 +15,8 @@ router.route("/signup").post(signupValidator(), validate, signupUser);
 router.route("/login").post(loginValidator(), validate, loginUser);
 router.route("/verifyemail").post(verifyUserEmail);
 
-// router.use(verifyJWT);
+router.use(verifyJWT);
+
+router.route('/logout').post(logoutUser);
 
 export default router;

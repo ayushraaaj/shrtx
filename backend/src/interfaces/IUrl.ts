@@ -7,6 +7,7 @@ export interface IUrl extends Document {
     clicks: number;
     qrGenerated: boolean;
     qrGeneratedAt?: Date;
+    isActive: boolean;
 }
 
 export interface UrlQuery {

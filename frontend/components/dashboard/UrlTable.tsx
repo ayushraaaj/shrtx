@@ -8,10 +8,12 @@ import {
 
 interface Props {
     urls: UrlApiItem[];
+    onToggleStatus(urlId: string): void;
+    onDeleteUrl(urlId: string): void;
 }
 
 const UrlTable = (props: Props) => {
-    const { urls } = props;
+    const { urls, onToggleStatus, onDeleteUrl } = props;
 
     if (urls.length === 0) return null;
 
@@ -42,12 +44,22 @@ const UrlTable = (props: Props) => {
                                     Engagement
                                 </div>
                             </th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
+                                Active
+                            </th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
+                                Delete
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody className="divide-y divide-zinc-100 bg-white">
                         {urls.map((url) => (
-                            <UrlTableRow key={url._id} url={url} />
+                            <UrlTableRow
+                                key={url._id}
+                                url={url}
+                                onToggleStatus={onToggleStatus} onDeleteUrl={onDeleteUrl}
+                            />
                         ))}
                     </tbody>
                 </table>
