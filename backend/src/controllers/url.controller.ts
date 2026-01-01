@@ -6,6 +6,8 @@ import { Url } from "../models/url.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import { BACKEND_URL, CLIENT_URL } from "../config/env";
 import { UrlQuery } from "../interfaces/IUrl";
+import ExcelJS from "exceljs";
+import QRCode from "qrcode";
 
 const isValidUrl = (url: string) => {
     try {
@@ -178,4 +180,113 @@ export const deleteUrl = asyncHandler(async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(new ApiResponse("Deleted successfully", {}));
+});
+
+export const exportUrls = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+    const { limit, type } = req.query;
+
+    let query = Url.find({ owner: userId }).sort({ createdAt: -1 });
+
+    if (limit !== "all") {
+        const num = Number(limit);
+        if (!isNaN(num)) {
+            query = query.limit(num);
+        }
+    }
+
+    const urls = await query.lean();
+
+    // type is CSV
+
+    if (type === "csv") {
+        let csv = "Original Url, Short Url, Clicks, Active, Created At\n";
+
+        urls.forEach((url) => {
+            csv += `"${url.originalUrl}", "${BACKEND_URL}/${url.shortCode}", "${url.clicks}", "${url.createdAt}"\n`;
+        });
+
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=urls-export.csv"
+        );
+
+        return res.status(200).send(csv);
+    }
+
+    // type is xlsx
+    else if (type === "xlsx") {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("URLs");
+
+        sheet.columns = [
+            { header: "Original URL", key: "originalUrl", width: 40 },
+            { header: "Short URL", key: "shortUrl", width: 30 },
+            { header: "QR Code", key: "qrCode", width: 20 },
+            { header: "Clicks", key: "clicks", width: 10 },
+            { header: "Active", key: "active", width: 10 },
+            { header: "Created At", key: "createdAt", width: 20 },
+        ];
+
+        let rowIndex = 2;
+
+        for (const url of urls) {
+            const shortUrl = `${BACKEND_URL}/${url.shortCode}`;
+            sheet.addRow({
+                originalUrl: {
+                    text: url.originalUrl,
+                    hyperlink: url.originalUrl,
+                },
+                shortUrl: {
+                    text: shortUrl,
+                    hyperlink: shortUrl,
+                },
+                clicks: url.clicks,
+                active: url.isActive,
+                createdAt: url.createdAt,
+            });
+
+            if (url.qrGenerated) {
+                // Generating QRcode image
+                const qrBuffer: any = await QRCode.toBuffer(shortUrl);
+
+                const qrImage = workbook.addImage({
+                    buffer: qrBuffer,
+                    extension: "png",
+                });
+
+                sheet.addImage(qrImage, {
+                    tl: { col: 2, row: rowIndex - 1 },
+                    ext: { width: 100, height: 100 },
+                });
+
+                sheet.getRow(rowIndex).height = 100;
+            }
+
+            rowIndex++;
+        }
+
+        sheet.eachRow((row) => {
+            row.eachCell((cell) => {
+                cell.alignment = { horizontal: "left", vertical: "middle" };
+            });
+        });
+
+        sheet.getRow(1).font = { bold: true };
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=urls-export.xlsx"
+        );
+
+        await workbook.xlsx.write(res);
+        return res.end();
+    }
+
+    throw new ApiError(400, "Invalid export type");
 });

@@ -8,6 +8,7 @@ export interface IUrl extends Document {
     qrGenerated: boolean;
     qrGeneratedAt?: Date;
     isActive: boolean;
+    createdAt: string;
 }
 
 export interface UrlQuery {

@@ -14,6 +14,7 @@ import {
     CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import Logout from "@/components/logout/Logout";
+import ExportModal from '@/components/dashboard/ExportModal'
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -24,6 +25,8 @@ const Dashboard = () => {
     const [page, setPage] = useState(1);
     const [isRemaining, setIsRemaining] = useState(true);
     const [searchText, setSearchText] = useState("");
+
+    const [showExportModal, setShowExportModal] = useState(false);
 
     const isValidUrl = (url: string) => {
         try {
@@ -169,6 +172,19 @@ const Dashboard = () => {
         fetchAllUrls(1);
     }, [searchText]);
 
+    useEffect(() => {
+        if (!response.message) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setResponse({ message: "", shortUrl: "" });
+            setOriginalUrl("");
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, [response.message]);
+
     return (
         <div className="min-h-screen bg-zinc-50 pt-10 pb-20 font-sans">
             <div className="max-w-6xl mx-auto px-6">
@@ -182,7 +198,11 @@ const Dashboard = () => {
                         </p>
                     </div>
 
-                    <Logout logoutResponse={(message:string)=> setResponse({message, shortUrl: ""})} />
+                    <Logout
+                        logoutResponse={(message: string) =>
+                            setResponse({ message, shortUrl: "" })
+                        }
+                    />
                 </header>
 
                 <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">
@@ -285,6 +305,10 @@ const Dashboard = () => {
                             Your URL History
                         </h2>
 
+                        <button onClick={()=>setShowExportModal(true)} className="px-4 py-2 border rounded font-bold hover:bg-gray-100">
+                            Export URLs
+                        </button>
+
                         <div className="relative w-full sm:w-80">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <MagnifyingGlassIcon className="h-4 w-4 text-zinc-400" />
@@ -336,6 +360,7 @@ const Dashboard = () => {
                     )}
                 </section>
             </div>
+            <ExportModal showExportModal={ showExportModal} onCloseModal={()=>setShowExportModal(false)} />
         </div>
     );
 };
