@@ -12,7 +12,7 @@ import {
     LinkIcon,
     InformationCircleIcon,
     CheckCircleIcon,
-    ArrowDownTrayIcon, // Added this icon
+    ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import Logout from "@/components/logout/Logout";
 import ExportModal from "@/components/dashboard/ExportModal";
@@ -355,10 +355,7 @@ const Dashboard = () => {
             </div>
 
             {showExportModal && (
-                <ExportModal
-                    showExportModal={showExportModal}
-                    onCloseModal={() => setShowExportModal(false)}
-                />
+                <ExportModal onCloseModal={() => setShowExportModal(false)} />
             )}
         </div>
     );
