@@ -12,9 +12,10 @@ import {
     LinkIcon,
     InformationCircleIcon,
     CheckCircleIcon,
+    ArrowDownTrayIcon, // Added this icon
 } from "@heroicons/react/24/outline";
 import Logout from "@/components/logout/Logout";
-import ExportModal from '@/components/dashboard/ExportModal'
+import ExportModal from "@/components/dashboard/ExportModal";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -25,7 +26,6 @@ const Dashboard = () => {
     const [page, setPage] = useState(1);
     const [isRemaining, setIsRemaining] = useState(true);
     const [searchText, setSearchText] = useState("");
-
     const [showExportModal, setShowExportModal] = useState(false);
 
     const isValidUrl = (url: string) => {
@@ -116,9 +116,7 @@ const Dashboard = () => {
     const onToggleStatus = async (urlId: string) => {
         try {
             const res = await api.patch(`/url/${urlId}/togglestatus`);
-
             const newStatus = res.data.data.isActive;
-
             setUrls((prev) =>
                 prev.map((url) =>
                     url._id === urlId ? { ...url, isActive: newStatus } : url
@@ -131,8 +129,6 @@ const Dashboard = () => {
                         error.response?.data.message ?? "Something went wrong",
                     shortUrl: "",
                 });
-            } else {
-                setResponse({ message: "Unexpected error", shortUrl: "" });
             }
         }
     };
@@ -141,13 +137,10 @@ const Dashboard = () => {
         const confirmDelete = confirm(
             "Are you sure you want to delete this URL?"
         );
-        if (!confirmDelete) {
-            return;
-        }
+        if (!confirmDelete) return;
 
         try {
             await api.delete(`/url/${urlId}/delete`);
-
             setUrls((prev) => prev.filter((url) => url._id !== urlId));
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -156,8 +149,6 @@ const Dashboard = () => {
                         error.response?.data.message ?? "Something went wrong",
                     shortUrl: "",
                 });
-            } else {
-                setResponse({ message: "Something went wrong", shortUrl: "" });
             }
         }
     };
@@ -173,15 +164,11 @@ const Dashboard = () => {
     }, [searchText]);
 
     useEffect(() => {
-        if (!response.message) {
-            return;
-        }
-
+        if (!response.message) return;
         const timer = setTimeout(() => {
             setResponse({ message: "", shortUrl: "" });
             setOriginalUrl("");
         }, 5000);
-
         return () => clearTimeout(timer);
     }, [response.message]);
 
@@ -197,7 +184,6 @@ const Dashboard = () => {
                             Manage and track your shortened links performance.
                         </p>
                     </div>
-
                     <Logout
                         logoutResponse={(message: string) =>
                             setResponse({ message, shortUrl: "" })
@@ -305,21 +291,29 @@ const Dashboard = () => {
                             Your URL History
                         </h2>
 
-                        <button onClick={()=>setShowExportModal(true)} className="px-4 py-2 border rounded font-bold hover:bg-gray-100">
-                            Export URLs
-                        </button>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button
+                                onClick={() => setShowExportModal(true)}
+                                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm active:scale-95 cursor-pointer"
+                            >
+                                <ArrowDownTrayIcon className="w-4 h-4 text-zinc-500" />
+                                Export
+                            </button>
 
-                        <div className="relative w-full sm:w-80">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <MagnifyingGlassIcon className="h-4 w-4 text-zinc-400" />
+                            <div className="relative w-full sm:w-80">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <MagnifyingGlassIcon className="h-4 w-4 text-zinc-400" />
+                                </div>
+                                <input
+                                    className="w-full bg-white border border-zinc-200 outline-none pl-10 pr-4 py-2.5 rounded-xl text-sm focus:border-blue-500 transition-all shadow-sm"
+                                    type="text"
+                                    placeholder="Search links..."
+                                    value={searchText}
+                                    onChange={(e) =>
+                                        setSearchText(e.target.value)
+                                    }
+                                />
                             </div>
-                            <input
-                                className="w-full bg-white border border-zinc-200 outline-none pl-10 pr-4 py-2.5 rounded-xl text-sm focus:border-blue-500 transition-all shadow-sm"
-                                type="text"
-                                placeholder="Search links..."
-                                value={searchText}
-                                onChange={(e) => setSearchText(e.target.value)}
-                            />
                         </div>
                     </div>
 
@@ -329,7 +323,6 @@ const Dashboard = () => {
                             onToggleStatus={onToggleStatus}
                             onDeleteUrl={onDeleteUrl}
                         />
-
                         {urls.length === 0 && !loading && (
                             <div className="py-20 flex flex-col items-center text-center">
                                 <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4">
@@ -360,7 +353,11 @@ const Dashboard = () => {
                     )}
                 </section>
             </div>
-            <ExportModal showExportModal={ showExportModal} onCloseModal={()=>setShowExportModal(false)} />
+
+            <ExportModal
+                showExportModal={showExportModal}
+                onCloseModal={() => setShowExportModal(false)}
+            />
         </div>
     );
 };
