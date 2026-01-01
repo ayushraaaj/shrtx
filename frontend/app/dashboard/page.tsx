@@ -354,10 +354,12 @@ const Dashboard = () => {
                 </section>
             </div>
 
-            <ExportModal
-                showExportModal={showExportModal}
-                onCloseModal={() => setShowExportModal(false)}
-            />
+            {showExportModal && (
+                <ExportModal
+                    showExportModal={showExportModal}
+                    onCloseModal={() => setShowExportModal(false)}
+                />
+            )}
         </div>
     );
 };
