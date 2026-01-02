@@ -9,9 +9,7 @@ export const useLogout = () => {
         try {
             const res = await api.post("/auth/logout");
 
-            setTimeout(() => {
-                router.replace("/login");
-            }, 1000);
+            router.replace("/login");
             
             return { message: res.data.message };
         } catch (error) {

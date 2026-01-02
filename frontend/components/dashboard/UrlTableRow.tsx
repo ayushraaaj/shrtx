@@ -1,104 +1,184 @@
+"use client";
 import { UrlApiItem } from "@/app/interfaces/url";
 import Link from "next/link";
 import GeneratingQR from "./GeneratingQR";
 import CopyButton from "./CopyButton";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 interface Props {
     url: UrlApiItem;
     onToggleStatus(urlId: string): void;
     onDeleteUrl(urlId: string): void;
+    expandedUrl: string;
+    onToggleExpandRow(): void;
 }
 
 const UrlTableRow = (props: Props) => {
-    const { url, onToggleStatus, onDeleteUrl } = props;
+    const { url, onToggleStatus, onDeleteUrl, expandedUrl, onToggleExpandRow } =
+        props;
+    const isExpanded = expandedUrl === url._id;
 
     return (
-        <tr className="group border-b border-zinc-50 hover:bg-zinc-50/80 transition-all duration-200">
-            <td className="px-6 py-4 max-w-70">
-                <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-zinc-200 p-1.5 shadow-sm">
-                        <img
-                            src={`https://www.google.com/s2/favicons?sz=64&domain=${url.originalUrl}`}
-                            alt="site icon"
-                            className="w-full h-full object-contain opacity-70"
-                        />
-                    </div>
-                    <div className="overflow-hidden">
-                        <p className="text-sm font-semibold text-zinc-900 truncate">
-                            {url.originalUrl.replace(/(^\w+:|^)\/\//, "")}
-                        </p>
-                        <p className="text-[10px] text-zinc-400 font-bold truncate uppercase tracking-tight">
-                            Destination
-                        </p>
-                    </div>
-                </div>
-            </td>
-
-            {/* 2. Short URL Column */}
-            <td className="px-6 py-4 text-center">
-                <div className="flex items-center gap-2 justify-center">
-                    <Link
-                        href={url.shortUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline decoration-2 underline-offset-4 transition-colors"
-                    >
-                        {url.shortUrl.replace("https://", "")}
-                    </Link>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <CopyButton shortUrl={url.shortUrl} />
-                    </div>
-                </div>
-            </td>
-
-            {/* 3. QR Code Column */}
-            <td className="px-6 py-4 text-center">
-                <div className="flex justify-center items-center">
-                    <GeneratingQR
-                        shortUrl={url.shortUrl}
-                        qrGenerated={url.qrGenerated}
+        <>
+            <tr
+                className={`group border-b border-zinc-50 hover:bg-zinc-50/80 transition-all duration-200 ${
+                    isExpanded ? "bg-zinc-50/50" : ""
+                }`}
+            >
+                <td
+                    className="pl-6 py-4 w-12 cursor-pointer"
+                    onClick={onToggleExpandRow}
+                >
+                    <ChevronRightIcon
+                        className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${
+                            isExpanded ? "rotate-90 text-blue-600" : ""
+                        }`}
                     />
-                </div>
-            </td>
+                </td>
 
-            <td className="px-6 py-4 text-center">
-                <div className="inline-flex flex-col items-center">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">
-                        {url.clicks}
-                    </span>
-                    <span className="text-[9px] font-bold text-zinc-400 mt-1 uppercase">
-                        Clicks
-                    </span>
-                </div>
-            </td>
+                <td className="px-6 py-4 min-w-[280px]">
+                    <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-white border border-zinc-200 p-1.5 shadow-sm">
+                            <img
+                                src={`https://www.google.com/s2/favicons?sz=64&domain=${url.originalUrl}`}
+                                alt="favicon"
+                                className="w-full h-full object-contain opacity-80"
+                            />
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                            <span className="text-sm font-bold text-zinc-800 truncate max-w-[200px]">
+                                {url.originalUrl.replace(/(^\w+:|^)\/\//, "")}
+                            </span>
+                            <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter">
+                                Source Link
+                            </span>
+                        </div>
+                    </div>
+                </td>
 
-            <td className="px-6 py-4 text-center">
-                <div className="flex justify-center">
-                    <label className="relative inline-flex items-center cursor-pointer group">
-                        <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={url.isActive}
-                            onChange={() => onToggleStatus(url._id)}
+                <td className="px-6 py-4 text-center min-w-[200px]">
+                    <div className="flex items-center justify-center gap-2">
+                        <Link
+                            href={url.shortUrl}
+                            target="_blank"
+                            className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                            {url.shortUrl.replace("https://", "")}
+                        </Link>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <CopyButton shortUrl={url.shortUrl} />
+                        </div>
+                    </div>
+                </td>
+
+                <td className="px-6 py-4 text-center w-32">
+                    <div className="flex justify-center">
+                        <GeneratingQR
+                            shortUrl={url.shortUrl}
+                            qrGenerated={url.qrGenerated}
                         />
-                        <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                </div>
-            </td>
+                    </div>
+                </td>
 
-            <td className="px-6 py-4 text-center">
-                <div className="flex justify-center">
+                <td className="px-6 py-4 text-center w-32">
+                    <div className="inline-flex flex-col items-center">
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-700 border border-zinc-200">
+                            {url.clicks}
+                        </span>
+                        <span className="text-[9px] font-bold text-zinc-400 mt-1 uppercase">
+                            Total Clicks
+                        </span>
+                    </div>
+                </td>
+
+                <td className="px-6 py-4 text-center w-32">
+                    <div className="flex justify-center">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                checked={url.isActive}
+                                onChange={() => onToggleStatus(url._id)}
+                            />
+                            <div className="w-9 h-5 bg-zinc-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                </td>
+
+                <td className="px-6 py-4 text-center w-24">
                     <button
                         onClick={() => onDeleteUrl(url._id)}
-                        className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90"
-                        title="Delete Link"
+                        className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                     >
                         <TrashIcon className="w-5 h-5" />
                     </button>
-                </div>
-            </td>
-        </tr>
+                </td>
+            </tr>
+
+            {isExpanded && (
+                <tr className="bg-zinc-50/50">
+                    <td colSpan={7} className="px-8 pb-6 pt-2">
+                        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden max-w-4xl">
+                            <div className="px-4 py-2 border-b border-zinc-100 bg-zinc-50/50">
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                                    Referral Sources Breakdown
+                                </span>
+                            </div>
+
+                            <div className="divide-y divide-zinc-50">
+                                {url.refs.map((ref) => {
+                                    const refUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${url.shortCode}?ref=${ref.source}`;
+                                    return (
+                                        <div
+                                            key={ref.source}
+                                            className="grid grid-cols-12 items-center px-5 py-3 hover:bg-zinc-50/50 transition-colors"
+                                        >
+                                            <div className="col-span-7 flex flex-col">
+                                                <span className="text-xs font-bold text-zinc-700">
+                                                    {ref.source}
+                                                </span>
+
+                                                <span className="text-[10px] truncate pr-4">
+                                                    <Link
+                                                        className="text-blue-600 hover:text-blue-700"
+                                                        target="_blank"
+                                                        href={refUrl}
+                                                    >
+                                                        {refUrl}
+                                                    </Link>
+                                                </span>
+                                            </div>
+
+                                            <div className="col-span-2 flex flex-col items-start">
+                                                <span className="text-xs font-bold text-zinc-900">
+                                                    {ref.clicks}
+                                                </span>
+                                                <span className="text-[9px] font-bold text-zinc-400 uppercase">
+                                                    Clicks
+                                                </span>
+                                            </div>
+
+                                            <div className="col-span-3 flex justify-end">
+                                                <button
+                                                    onClick={() =>
+                                                        navigator.clipboard.writeText(
+                                                            refUrl
+                                                        )
+                                                    }
+                                                    className="px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold rounded-lg hover:bg-zinc-800 transition-all active:scale-95"
+                                                >
+                                                    Copy Link
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            )}
+        </>
     );
 };
 

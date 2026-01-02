@@ -1,10 +1,7 @@
+"use client";
+import { useState } from "react";
 import { UrlApiItem } from "@/app/interfaces/url";
 import UrlTableRow from "./UrlTableRow";
-import {
-    LinkIcon,
-    QrCodeIcon,
-    ChartBarIcon,
-} from "@heroicons/react/24/outline";
 
 interface Props {
     urls: UrlApiItem[];
@@ -12,59 +9,57 @@ interface Props {
     onDeleteUrl(urlId: string): void;
 }
 
-const UrlTable = (props: Props) => {
-    const { urls, onToggleStatus, onDeleteUrl } = props;
+const UrlTable = ({ urls, onToggleStatus, onDeleteUrl }: Props) => {
+    const [expandedUrl, setExpandedUrl] = useState("");
 
-    if (urls.length === 0) return null;
+    const handleToggleExpandRow = (urlId: string) => {
+        setExpandedUrl(expandedUrl === urlId ? "" : urlId);
+    };
 
     return (
-        <div className="relative overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-zinc-100 bg-zinc-50/50">
-                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                                <div className="flex items-center justify-center gap-2">
-                                    <LinkIcon className="w-4 h-4" />
-                                    Source Destination
-                                </div>
-                            </th>
-                            <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
-                                Short URL
-                            </th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                                <div className="flex items-center justify-center gap-2">
-                                    <QrCodeIcon className="w-4 h-4" />
-                                    QR Code
-                                </div>
-                            </th>
-                            <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                                <div className="flex items-center justify-center gap-2">
-                                    <ChartBarIcon className="w-4 h-4" />
-                                    Engagement
-                                </div>
-                            </th>
-                            <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
-                                Active
-                            </th>
-                            <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-zinc-500">
-                                Delete
-                            </th>
-                        </tr>
-                    </thead>
+        <table className="w-full border-collapse text-left">
+            <thead className="bg-zinc-50/50 border-b border-zinc-100">
+                <tr>
+                    <th className="pl-6 py-4 w-12"></th>
 
-                    <tbody className="divide-y divide-zinc-100 bg-white">
-                        {urls.map((url) => (
-                            <UrlTableRow
-                                key={url._id}
-                                url={url}
-                                onToggleStatus={onToggleStatus} onDeleteUrl={onDeleteUrl}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Source Destination
+                    </th>
+
+                    <th className="px-6 py-4 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Shortened URL
+                    </th>
+
+                    <th className="px-6 py-4 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        QR Code
+                    </th>
+
+                    <th className="px-6 py-4 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Engagement
+                    </th>
+
+                    <th className="px-6 py-4 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Status
+                    </th>
+
+                    <th className="px-6 py-4 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-50">
+                {urls.map((url) => (
+                    <UrlTableRow
+                        key={url._id}
+                        url={url}
+                        onToggleStatus={onToggleStatus}
+                        onDeleteUrl={onDeleteUrl}
+                        expandedUrl={expandedUrl}
+                        onToggleExpandRow={() => handleToggleExpandRow(url._id)}
+                    />
+                ))}
+            </tbody>
+        </table>
     );
 };
 

@@ -17,6 +17,6 @@ router.route("/verifyemail").post(verifyUserEmail);
 
 router.use(verifyJWT);
 
-router.route('/logout').post(logoutUser);
+router.route("/logout").post(logoutUser);
 
 export default router;

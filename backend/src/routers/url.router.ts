@@ -8,12 +8,14 @@ import {
     toggleUrlStatus,
 } from "../controllers/url.controller";
 import { verifyJWT } from "../middlewares/auth.middleware";
+import { shortUrlValidator } from "../validators/url.validators";
+import { validate } from "../middlewares/validator.middleware";
 
 const router = Router();
 
 router.use(verifyJWT);
 
-router.route("/").post(shortUrl);
+router.route("/").post(shortUrlValidator(), validate, shortUrl);
 router.route("/generate-qr").post(generateQR);
 router.route("/get-all").get(getAllUrlDetails);
 

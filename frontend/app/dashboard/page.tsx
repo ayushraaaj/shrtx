@@ -14,7 +14,6 @@ import {
     CheckCircleIcon,
     ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
-import Logout from "@/components/logout/Logout";
 import ExportModal from "@/components/dashboard/ExportModal";
 
 const Dashboard = () => {
@@ -174,7 +173,7 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen bg-zinc-50 pt-10 pb-20 font-sans">
-            <div className="max-w-6xl mx-auto px-6">
+            <div className="max-w-8xl mx-auto px-6">
                 <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
@@ -184,11 +183,6 @@ const Dashboard = () => {
                             Manage and track your shortened links performance.
                         </p>
                     </div>
-                    <Logout
-                        logoutResponse={(message: string) =>
-                            setResponse({ message, shortUrl: "" })
-                        }
-                    />
                 </header>
 
                 <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">

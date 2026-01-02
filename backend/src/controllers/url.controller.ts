@@ -34,10 +34,19 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
 
     const shortCode = crypto.randomBytes(3).toString("hex").substring(0, 5);
 
+    const REF_SOURCES = ["instagram", "facebook", "twitter", "whatsapp"];
+
+    const refs = REF_SOURCES.map((source) => ({
+        source,
+        clicks: 0,
+        createdAt: new Date(),
+    }));
+
     const response = await Url.create({
         shortCode: shortCode,
         originalUrl: originalUrl,
         owner: userId,
+        refs,
     });
 
     const shortenedUrl = `${BACKEND_URL}/${shortCode}`;
@@ -50,17 +59,23 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
 export const openShortUrl = asyncHandler(
     async (req: Request, res: Response) => {
         const { shortCode } = req.params;
+        const { ref } = req.query;
 
         const urlDoc = await Url.findOne({ shortCode });
         if (!urlDoc || !urlDoc.isActive) {
             return res.redirect(`${CLIENT_URL}/404`);
         }
 
-        // if (!urlDoc.isActive) {
-        //     throw new ApiError(400, "Unauthorized");
-        // }
-
         urlDoc.clicks += 1;
+
+        if (ref) {
+            const findRef = urlDoc.refs.find((r) => r.source === ref);
+
+            if (findRef) {
+                findRef.clicks += 1;
+            }
+
+        }
         urlDoc.save({ validateBeforeSave: false });
 
         return res.redirect(urlDoc.originalUrl);
@@ -290,3 +305,9 @@ export const exportUrls = asyncHandler(async (req: Request, res: Response) => {
 
     throw new ApiError(400, "Invalid export type");
 });
+
+export const detailedAnalytics = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+
+    
+})

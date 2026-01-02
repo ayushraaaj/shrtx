@@ -1,5 +1,11 @@
 import { Document, Types } from "mongoose";
 
+export interface IUrlRef {
+    source: string;
+    clicks: number;
+    createdAt: Date;
+}
+
 export interface IUrl extends Document {
     shortCode: string;
     originalUrl: string;
@@ -9,6 +15,7 @@ export interface IUrl extends Document {
     qrGeneratedAt?: Date;
     isActive: boolean;
     createdAt: string;
+    refs: IUrlRef[];
 }
 
 export interface UrlQuery {

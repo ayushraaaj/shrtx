@@ -1,3 +1,9 @@
+export interface UrlRef {
+    source: string;
+    clicks: number;
+    createdAt: Date;
+}
+
 export interface UrlApiItem {
     _id: string;
     shortCode: string;
@@ -10,5 +16,6 @@ export interface UrlApiItem {
     __v: number;
     qrGeneratedAt: string;
     shortUrl: string;
-    isActive: boolean
+    isActive: boolean;
+    refs: UrlRef[];
 }
