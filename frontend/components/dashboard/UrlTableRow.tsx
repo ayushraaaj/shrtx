@@ -4,6 +4,7 @@ import Link from "next/link";
 import GeneratingQR from "./GeneratingQR";
 import CopyButton from "./CopyButton";
 import { TrashIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 
 interface Props {
     url: UrlApiItem;
@@ -17,6 +18,12 @@ const UrlTableRow = (props: Props) => {
     const { url, onToggleStatus, onDeleteUrl, expandedUrl, onToggleExpandRow } =
         props;
     const isExpanded = expandedUrl === url._id;
+
+    const router = useRouter();
+
+    const analyticsForUrl = (urlId: string) => {
+        router.push(`/dashboard/analytics/${urlId}`);
+    };
 
     return (
         <>
@@ -147,7 +154,19 @@ const UrlTableRow = (props: Props) => {
                                                         {refUrl}
                                                     </Link>
                                                 </span>
+                                                {/* <span>
+                                                    <GeneratingQR
+                                                        shortUrl={refUrl}
+                                                        qrGenerated={
+                                                            url.qrGenerated
+                                                        }
+                                                    />
+                                                </span> */}
                                             </div>
+
+                                            {/* <div className="">
+                                                    
+                                                </div> */}
 
                                             <div className="col-span-2 flex flex-col items-start">
                                                 <span className="text-xs font-bold text-zinc-900">
@@ -175,6 +194,11 @@ const UrlTableRow = (props: Props) => {
                                 })}
                             </div>
                         </div>
+                    </td>
+                    <td>
+                        <button onClick={() => analyticsForUrl(url._id)}>
+                            Detailed analytics
+                        </button>
                     </td>
                 </tr>
             )}

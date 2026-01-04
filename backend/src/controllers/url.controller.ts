@@ -74,7 +74,6 @@ export const openShortUrl = asyncHandler(
             if (findRef) {
                 findRef.clicks += 1;
             }
-
         }
         urlDoc.save({ validateBeforeSave: false });
 
@@ -306,8 +305,78 @@ export const exportUrls = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "Invalid export type");
 });
 
-export const detailedAnalytics = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+export const getUrlAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const urlId = req.params.id;
 
-    
-})
+        const urlDoc = await Url.findOne({ _id: urlId, owner: userId }).lean();
+
+        if (!urlDoc) {
+            throw new ApiError(404, "URL not found");
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Fetching successfull", urlDoc));
+    }
+);
+
+export const getAllUrlAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+
+        const urlsDoc = await Url.find({ owner: userId })
+            .select("-_id clicks isActive refs.source refs.clicks")
+            .lean();
+
+        const totalUrls = urlsDoc.length;
+        const activeUrls = urlsDoc.filter((url) => url.isActive).length;
+
+        const totalClicks = urlsDoc.reduce((sum, url) => sum + url.clicks, 0);
+
+        const refsMap: Record<string, number> = {
+            instagram: 0,
+            facebook: 0,
+            twitter: 0,
+            whatsapp: 0,
+            direct: 0,
+        };
+
+        urlsDoc.forEach((url) => {
+            url.refs.forEach((ref) => {
+                refsMap[ref.source] += ref.clicks;
+            });
+        });
+
+        const totalRefsClicks = Object.values(refsMap).reduce(
+            (sum, clicks) => sum + clicks,
+            0
+        );
+
+        const directClicks = totalClicks - totalRefsClicks;
+
+        refsMap.direct = directClicks;
+
+        const refsArray = Object.entries(refsMap).map(([source, clicks]) => ({
+            source,
+            clicks,
+        }));
+
+        const response = {
+            totalUrls,
+            activeUrls,
+            totalClicks,
+            refs: refsArray,
+        };
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    "Overview analytics fetched successfully",
+                    response
+                )
+            );
+    }
+);

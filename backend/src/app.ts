@@ -6,7 +6,8 @@ const app = express();
 
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        // origin: "http://localhost:3000",
+        origin: `${CLIENT_URL}`,
         credentials: true,
     })
 );
@@ -18,6 +19,7 @@ import healthCheckRouter from "./routers/healthcheck.route";
 import authRouter from "./routers/auth.router";
 import urlRouter from "./routers/url.router";
 import redirectRouter from "./routers/redirect.router";
+import { CLIENT_URL } from "./config/env";
 
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);

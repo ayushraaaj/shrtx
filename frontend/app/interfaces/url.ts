@@ -1,7 +1,8 @@
 export interface UrlRef {
     source: string;
     clicks: number;
-    createdAt: Date;
+    createdAt: string;
+    [key: string]: string | number;
 }
 
 export interface UrlApiItem {
@@ -11,11 +12,29 @@ export interface UrlApiItem {
     owner: string;
     clicks: number;
     qrGenerated: boolean;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Date;
+    updatedAt: Date;
     __v: number;
-    qrGeneratedAt: string;
+    qrGeneratedAt: Date;
     shortUrl: string;
     isActive: boolean;
+    refs: UrlRef[];
+}
+
+export interface UrlAnalytics {
+    shortCode: string;
+    originalUrl: string;
+    clicks: number;
+    qrGenerated: boolean;
+    isActive: boolean;
+    refs: UrlRef[];
+    createdAt: Date;
+    qrGeneratedAt: Date;
+}
+
+export interface AllUrlAnalytics {
+    totalUrls: number;
+    activeUrls: number;
+    totalClicks: number;
     refs: UrlRef[];
 }

@@ -17,7 +17,7 @@ const UrlTable = ({ urls, onToggleStatus, onDeleteUrl }: Props) => {
     };
 
     return (
-        <table className="w-full border-collapse text-left">
+        <table className="w-full border-collapse">
             <thead className="bg-zinc-50/50 border-b border-zinc-100">
                 <tr>
                     <th className="pl-6 py-4 w-12"></th>
