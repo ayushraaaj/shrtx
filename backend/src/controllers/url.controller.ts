@@ -310,15 +310,34 @@ export const getUrlAnalytics = asyncHandler(
         const userId = req.user?._id;
         const urlId = req.params.id;
 
-        const urlDoc = await Url.findOne({ _id: urlId, owner: userId }).lean();
+        const urlDoc = await Url.findOne({ _id: urlId, owner: userId })
+            .select("shortCode originalUrl clicks refs.source refs.clicks -_id")
+            .lean();
 
         if (!urlDoc) {
             throw new ApiError(404, "URL not found");
         }
 
-        return res
-            .status(200)
-            .json(new ApiResponse("Fetching successfull", urlDoc));
+        let refsClick = 0;
+        urlDoc.refs.forEach((ref) => {
+            refsClick += ref.clicks;
+        });
+
+        const directClicks = urlDoc.clicks - refsClick;
+
+        const refs = [
+            ...urlDoc.refs,
+            { source: "direct", clicks: directClicks },
+        ];
+
+        const response = {
+            shortCode: urlDoc.shortCode,
+            originalUrl: urlDoc.originalUrl,
+            clicks: urlDoc.clicks,
+            refs,
+        };
+
+        return res.status(200).json(new ApiResponse("Fetching successfull", response));
     }
 );
 

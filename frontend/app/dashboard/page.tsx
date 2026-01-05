@@ -172,7 +172,7 @@ const Dashboard = () => {
     }, [response.message]);
 
     return (
-        <div className="min-h-screen bg-zinc-50 pt-10 pb-20 font-sans">
+        <div className="min-h-screen bg-zinc-50 pb-20 font-sans">
             <div className="max-w-8xl mx-auto px-6">
                 <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
