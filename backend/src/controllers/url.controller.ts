@@ -8,6 +8,8 @@ import { BACKEND_URL, CLIENT_URL } from "../config/env";
 import { UrlQuery } from "../interfaces/IUrl";
 import ExcelJS from "exceljs";
 import QRCode from "qrcode";
+import { Types } from "mongoose";
+import PDFDocument from "pdfkit";
 
 const isValidUrl = (url: string) => {
     try {
@@ -305,89 +307,177 @@ export const exportUrls = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "Invalid export type");
 });
 
+const getUrlAnalyticsData = async (urlId: string, userId: Types.ObjectId) => {
+    const urlDoc = await Url.findOne({ _id: urlId, owner: userId })
+        .select("shortCode originalUrl clicks refs.source refs.clicks -_id")
+        .lean();
+
+    if (!urlDoc) {
+        throw new ApiError(404, "URL not found");
+    }
+
+    let refsClick = 0;
+    urlDoc.refs.forEach((ref) => {
+        refsClick += ref.clicks;
+    });
+
+    const directClicks = urlDoc.clicks - refsClick;
+
+    const refs = [...urlDoc.refs, { source: "direct", clicks: directClicks }];
+
+    const response = {
+        shortCode: urlDoc.shortCode,
+        originalUrl: urlDoc.originalUrl,
+        clicks: urlDoc.clicks,
+        refs,
+    };
+
+    return response;
+};
+
 export const getUrlAnalytics = asyncHandler(
     async (req: Request, res: Response) => {
         const userId = req.user?._id;
         const urlId = req.params.id;
 
-        const urlDoc = await Url.findOne({ _id: urlId, owner: userId })
-            .select("shortCode originalUrl clicks refs.source refs.clicks -_id")
-            .lean();
-
-        if (!urlDoc) {
-            throw new ApiError(404, "URL not found");
+        if (!userId) {
+            throw new ApiError(404, "Unauthorized");
         }
 
-        let refsClick = 0;
-        urlDoc.refs.forEach((ref) => {
-            refsClick += ref.clicks;
-        });
+        const response = await getUrlAnalyticsData(urlId, userId);
 
-        const directClicks = urlDoc.clicks - refsClick;
-
-        const refs = [
-            ...urlDoc.refs,
-            { source: "direct", clicks: directClicks },
-        ];
-
-        const response = {
-            shortCode: urlDoc.shortCode,
-            originalUrl: urlDoc.originalUrl,
-            clicks: urlDoc.clicks,
-            refs,
-        };
-
-        return res.status(200).json(new ApiResponse("Fetching successfull", response));
+        return res
+            .status(200)
+            .json(new ApiResponse("Fetching successfull", response));
     }
 );
+
+export const exportUrlAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const urlId = req.params.id;
+        const { charts } = req.body;
+
+        if (!userId) {
+            throw new ApiError(404, "Unauthorized");
+        }
+
+        const analytics = await getUrlAnalyticsData(urlId, userId);
+
+        const doc = new PDFDocument({ margin: 40 });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=url-analytics-${analytics.shortCode}.pdf`
+        );
+
+        doc.pipe(res);
+
+        doc.fontSize(18).text("URL Analytics Report", { align: "center" });
+        doc.moveDown();
+
+        doc.fontSize(12);
+        doc.text(`Short URL: ${CLIENT_URL}/${analytics.shortCode}`);
+        doc.moveDown(0.5);
+
+        doc.text(`Original URL: ${analytics.originalUrl}`);
+        doc.moveDown(0.5);
+
+        doc.text(`Total Clicks: ${analytics.clicks}`);
+        doc.moveDown();
+
+        doc.fontSize(14).text("Traffic by Source");
+        doc.moveDown(0.5);
+
+        const barChartImage = charts.bar.replace(
+            /^data:image\/png;base64,/,
+            ""
+        );
+        doc.image(Buffer.from(barChartImage, "base64"), {
+            fit: [500, 250],
+            align: "center",
+        });
+
+        doc.moveDown();
+
+        doc.fontSize(13).text("Traffix Distribution");
+        doc.moveDown(0.5);
+
+        const pieChartImage = charts.pie.replace(
+            /^data:image\/png;base64,/,
+            ""
+        );
+        doc.image(Buffer.from(pieChartImage, "base64"), {
+            fit: [400, 250],
+            align: "center",
+        });
+
+        doc.moveDown();
+
+        doc.fontSize(10).text(`Generated on ${new Date()}`, { align: "right" });
+
+        doc.end();
+    }
+);
+
+const getAllUrlAnalyticsData = async (userId: Types.ObjectId) => {
+    const urlsDoc = await Url.find({ owner: userId })
+        .select("-_id clicks isActive refs.source refs.clicks")
+        .lean();
+
+    const totalUrls = urlsDoc.length;
+    const activeUrls = urlsDoc.filter((url) => url.isActive).length;
+
+    const totalClicks = urlsDoc.reduce((sum, url) => sum + url.clicks, 0);
+
+    const refsMap: Record<string, number> = {
+        instagram: 0,
+        facebook: 0,
+        twitter: 0,
+        whatsapp: 0,
+        direct: 0,
+    };
+
+    urlsDoc.forEach((url) => {
+        url.refs.forEach((ref) => {
+            refsMap[ref.source] += ref.clicks;
+        });
+    });
+
+    const totalRefsClicks = Object.values(refsMap).reduce(
+        (sum, clicks) => sum + clicks,
+        0
+    );
+
+    const directClicks = totalClicks - totalRefsClicks;
+
+    refsMap.direct = directClicks;
+
+    const refsArray = Object.entries(refsMap).map(([source, clicks]) => ({
+        source,
+        clicks,
+    }));
+
+    const response = {
+        totalUrls,
+        activeUrls,
+        totalClicks,
+        refs: refsArray,
+    };
+
+    return response;
+};
 
 export const getAllUrlAnalytics = asyncHandler(
     async (req: Request, res: Response) => {
         const userId = req.user?._id;
 
-        const urlsDoc = await Url.find({ owner: userId })
-            .select("-_id clicks isActive refs.source refs.clicks")
-            .lean();
+        if (!userId) {
+            throw new ApiError(404, "Unauthorized");
+        }
 
-        const totalUrls = urlsDoc.length;
-        const activeUrls = urlsDoc.filter((url) => url.isActive).length;
-
-        const totalClicks = urlsDoc.reduce((sum, url) => sum + url.clicks, 0);
-
-        const refsMap: Record<string, number> = {
-            instagram: 0,
-            facebook: 0,
-            twitter: 0,
-            whatsapp: 0,
-            direct: 0,
-        };
-
-        urlsDoc.forEach((url) => {
-            url.refs.forEach((ref) => {
-                refsMap[ref.source] += ref.clicks;
-            });
-        });
-
-        const totalRefsClicks = Object.values(refsMap).reduce(
-            (sum, clicks) => sum + clicks,
-            0
-        );
-
-        const directClicks = totalClicks - totalRefsClicks;
-
-        refsMap.direct = directClicks;
-
-        const refsArray = Object.entries(refsMap).map(([source, clicks]) => ({
-            source,
-            clicks,
-        }));
-
-        const response = {
-            totalUrls,
-            activeUrls,
-            totalClicks,
-            refs: refsArray,
-        };
+        const response = await getAllUrlAnalyticsData(userId);
 
         return res
             .status(200)
@@ -397,5 +487,74 @@ export const getAllUrlAnalytics = asyncHandler(
                     response
                 )
             );
+    }
+);
+
+export const exportAllUrlsAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const { charts } = req.body;
+
+        if (!userId) {
+            throw new ApiError(404, "Unauthorized");
+        }
+
+        const analytics = await getAllUrlAnalyticsData(userId);
+
+        const doc = new PDFDocument({ margin: 40 });
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=all-url-analytics.pdf"
+        );
+
+        doc.pipe(res);
+
+        doc.fontSize(18).text("Analytics Overview", { align: "center" });
+        doc.moveDown();
+
+        doc.fontSize(12);
+
+        doc.text(`Total URLs: ${analytics.totalUrls}`, { continued: true });
+
+        doc.text(`Active Links: ${analytics.activeUrls}`, 80, doc.y, {
+            continued: true,
+        });
+
+        doc.text(`Total Clicks: ${analytics.totalClicks}`, 120, doc.y);
+        doc.moveDown(1.5);
+
+        doc.fontSize(14).text("Traffic by Source");
+        doc.moveDown(0.5);
+
+        const barChartImage = charts.bar.replace(
+            /^data:image\/png;base64,/,
+            ""
+        );
+        doc.image(Buffer.from(barChartImage, "base64"), {
+            fit: [500, 250],
+            align: "center",
+        });
+
+        doc.moveDown();
+
+        doc.fontSize(13).text("Traffix Distribution");
+        doc.moveDown(0.5);
+
+        const pieChartImage = charts.pie.replace(
+            /^data:image\/png;base64,/,
+            ""
+        );
+        doc.image(Buffer.from(pieChartImage, "base64"), {
+            fit: [400, 250],
+            align: "center",
+        });
+
+        doc.moveDown();
+
+        doc.fontSize(10).text(`Generated on ${new Date()}`, { align: "right" });
+
+        doc.end();
     }
 );

@@ -98,7 +98,7 @@ const RefClicksPieChart = ({ refs }: { refs: UrlRef[] }) => {
                         verticalAlign="bottom"
                         height={36}
                         content={({ payload }) => (
-                            <div className="flex justify-center gap-4 mt-4">
+                            <div className="flex justify-center flex-wrap gap-4 mt-4">
                                 {payload?.map((entry: any, index: number) => (
                                     <div
                                         key={`item-${index}`}

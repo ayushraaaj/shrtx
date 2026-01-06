@@ -4,10 +4,12 @@ import RefClicksPieChart from "./RefClicksPieChart";
 
 interface Props {
     refs: UrlRef[];
+    barChartRef: React.RefObject<HTMLDivElement | null>;
+    pieChartRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const ChartsCard = (props: Props) => {
-    const { refs } = props;
+    const { refs, barChartRef, pieChartRef } = props;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -18,7 +20,7 @@ const ChartsCard = (props: Props) => {
                         By Source
                     </span>
                 </h3>
-                <div className="flex justify-center h-[300px]">
+                <div ref={pieChartRef} className="flex justify-center h-[300px]">
                     <RefClicksPieChart refs={refs} />
                 </div>
             </div>
@@ -30,7 +32,7 @@ const ChartsCard = (props: Props) => {
                         Click Count
                     </span>
                 </h3>
-                <div className="h-[300px]">
+                <div ref={barChartRef} className="h-[300px]">
                     <RefClicksBarChart refs={refs} />
                 </div>
             </div>

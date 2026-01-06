@@ -4,21 +4,82 @@ import { api } from "@/lib/axios";
 import axios from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     ArrowLeftIcon,
     ChartBarIcon,
     CursorArrowRaysIcon,
     ArrowTopRightOnSquareIcon,
+    ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import CopyButton from "@/components/dashboard/CopyButton";
 import ChartsCard from "@/components/analytics/ChartsCard";
+import * as htmlToImage from "html-to-image";
 
 const AnalyticsForUrl = () => {
     const { id } = useParams();
 
+    const barChartRef = useRef<HTMLDivElement>(null);
+    const pieChartRef = useRef<HTMLDivElement>(null);
+
     const [urlData, setUrlData] = useState<UrlAnalytics | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const [exporting, setExporting] = useState(false);
+
+    const captureChart = async (
+        chartRef: React.RefObject<HTMLDivElement | null>
+    ) => {
+        if (!chartRef.current) {
+            throw new Error("Chart not found");
+        }
+
+        return await htmlToImage.toPng(chartRef.current, {
+            backgroundColor: "#ffffff",
+            pixelRatio: 2,
+        });
+    };
+
+    const handleExportPdf = async () => {
+        try {
+            setExporting(true);
+
+            const barChartImage = await captureChart(barChartRef);
+            const pieChartImage = await captureChart(pieChartRef);
+
+            const res = await api.post(
+                `/url/analytics/${id}/export/pdf`,
+                {
+                    charts: {
+                        bar: barChartImage,
+                        pie: pieChartImage,
+                    },
+                },
+                {
+                    responseType: "blob",
+                }
+            );
+
+            const blob = new Blob([res.data], {
+                type: "application/pdf",
+            });
+
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `url-analytics-${urlData?.shortCode}.pdf`;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Failed to export analytics", error);
+        } finally {
+            setExporting(false);
+        }
+    };
 
     const fetchUrlData = async () => {
         try {
@@ -64,17 +125,37 @@ const AnalyticsForUrl = () => {
                     </Link>
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 w-[100vw]">
                             <div className="p-3 bg-white border border-zinc-200 rounded-2xl shadow-sm">
                                 <ChartBarIcon className="w-6 h-6 text-blue-600" />
                             </div>
-                            <div>
-                                <h1 className="text-2xl font-black text-zinc-900 tracking-tight">
-                                    URL Analytics
-                                </h1>
-                                <p className="text-zinc-500 text-sm font-medium">
-                                    Tracking data for your shortened link
-                                </p>
+                            <div className="flex justify-between w-[100%]">
+                                <div>
+                                    <h1 className="text-2xl font-black text-zinc-900 tracking-tight">
+                                        URL Analytics
+                                    </h1>
+                                    <p className="text-zinc-500 text-sm font-medium">
+                                        Tracking data for your shortened link
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={handleExportPdf}
+                                    disabled={exporting}
+                                    className={`flex items-center gap-2 px-4 bg-white border border-blue-100 text-blue-600 rounded-xl text-xs font-bold transition-all duration-200 hover:bg-blue-50 hover:border-blue-200 active:scale-95 disabled:opacity-70 ${
+                                        exporting
+                                            ? "disabled:cursor-not-allowed"
+                                            : "cursor-pointer"
+                                    } shadow-sm shadow-blue-500/5`}
+                                >
+                                    <ArrowDownTrayIcon className="w-4 h-4 transition-transform" />
+
+                                    <span>
+                                        {exporting
+                                            ? "Exporting..."
+                                            : "Export Analysis"}
+                                    </span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -129,7 +210,13 @@ const AnalyticsForUrl = () => {
                     </div>
                 </section>
 
-                {urlData?.refs && <ChartsCard refs={urlData.refs} />}
+                {urlData?.refs && (
+                    <ChartsCard
+                        refs={urlData.refs}
+                        barChartRef={barChartRef}
+                        pieChartRef={pieChartRef}
+                    />
+                )}
             </div>
         </div>
     );

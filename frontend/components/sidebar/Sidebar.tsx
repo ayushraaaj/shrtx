@@ -6,6 +6,7 @@ import {
     LinkIcon,
 } from "@heroicons/react/24/outline";
 import Logout from "../logout/Logout";
+import Link from "next/link";
 
 const Sidebar = () => {
     return (
@@ -15,7 +16,7 @@ const Sidebar = () => {
                     <LinkIcon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-extrabold text-zinc-900 tracking-tight">
-                    Shrtx
+                    <Link href="/">Shrtx</Link>
                 </span>
             </div>
 

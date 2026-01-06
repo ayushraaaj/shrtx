@@ -2,20 +2,81 @@
 import { AllUrlAnalytics } from "@/app/interfaces/url";
 import { api } from "@/lib/axios";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     ChartBarIcon,
     LinkIcon,
     CursorArrowRaysIcon,
     CheckBadgeIcon,
+    ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import StatCard from "@/components/statcard/StatCard";
 import ChartsCard from "@/components/analytics/ChartsCard";
+import * as htmlToImage from "html-to-image";
 
 const Analytics = () => {
+    const barChartRef = useRef<HTMLDivElement>(null);
+    const pieChartRef = useRef<HTMLDivElement>(null);
+
     const [allUrlData, setAllUrlData] = useState<AllUrlAnalytics | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const [exporting, setExporting] = useState(false);
+
+    const captureChart = async (
+        chartRef: React.RefObject<HTMLDivElement | null>
+    ) => {
+        if (!chartRef.current) {
+            throw new Error("Chart not found");
+        }
+
+        return await htmlToImage.toPng(chartRef.current, {
+            backgroundColor: "#ffffff",
+            pixelRatio: 2,
+        });
+    };
+
+    const handleExportPdf = async () => {
+        try {
+            setExporting(true);
+
+            const barChartImage = await captureChart(barChartRef);
+            const pieChartImage = await captureChart(pieChartRef);
+
+            const res = await api.post(
+                "/url/analytics/export/overview/pdf",
+                {
+                    charts: {
+                        bar: barChartImage,
+                        pie: pieChartImage,
+                    },
+                },
+                {
+                    responseType: "blob",
+                }
+            );
+
+            const blob = new Blob([res.data], {
+                type: "application/pdf",
+            });
+
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = "all-url-analytics.pdf";
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Failed to export analytics", error);
+        } finally {
+            setExporting(false);
+        }
+    };
 
     const fetchAllUrlData = async () => {
         try {
@@ -55,19 +116,37 @@ const Analytics = () => {
     return (
         <div className="min-h-screen bg-zinc-50 pb-20 px-6">
             <div className="max-w-6xl mx-auto">
-                <header className="mb-10">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/20">
-                            <ChartBarIcon className="w-5 h-5 text-white" />
+                <header className="mb-10 flex justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/20">
+                                <ChartBarIcon className="w-5 h-5 text-white" />
+                            </div>
+                            <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
+                                Analytics Overview
+                            </h1>
                         </div>
-                        <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
-                            Analytics Overview
-                        </h1>
+                        <p className="text-zinc-500 font-medium">
+                            Comprehensive performance tracking across all your
+                            shortened links.
+                        </p>
                     </div>
-                    <p className="text-zinc-500 font-medium">
-                        Comprehensive performance tracking across all your
-                        shortened links.
-                    </p>
+
+                    <button
+                        onClick={handleExportPdf}
+                        disabled={exporting}
+                        className={`flex items-center gap-2 px-4 bg-white border border-blue-100 text-blue-600 rounded-xl text-xs font-bold transition-all duration-200 hover:bg-blue-50 hover:border-blue-200 active:scale-95 disabled:opacity-70 ${
+                            exporting
+                                ? "disabled:cursor-not-allowed"
+                                : "cursor-pointer"
+                        } shadow-sm shadow-blue-500/5`}
+                    >
+                        <ArrowDownTrayIcon className="w-4 h-4 transition-transform" />
+
+                        <span>
+                            {exporting ? "Exporting..." : "Export Analysis"}
+                        </span>
+                    </button>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -94,7 +173,13 @@ const Analytics = () => {
                     />
                 </div>
 
-                {allUrlData?.refs && <ChartsCard refs={allUrlData.refs} />}
+                {allUrlData?.refs && (
+                    <ChartsCard
+                        refs={allUrlData.refs}
+                        barChartRef={barChartRef}
+                        pieChartRef={pieChartRef}
+                    />
+                )}
             </div>
         </div>
     );
