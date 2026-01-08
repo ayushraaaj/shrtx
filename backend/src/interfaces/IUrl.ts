@@ -16,6 +16,7 @@ export interface IUrl extends Document {
     isActive: boolean;
     createdAt: string;
     refs: IUrlRef[];
+    group: Types.ObjectId
 }
 
 export interface UrlQuery {

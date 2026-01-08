@@ -7,20 +7,63 @@ interface Props {
     urls: UrlApiItem[];
     onToggleStatus(urlId: string): void;
     onDeleteUrl(urlId: string): void;
+    isBulkAddMode: boolean;
+    isBulkRemoveMode: boolean;
 }
 
-const UrlTable = ({ urls, onToggleStatus, onDeleteUrl }: Props) => {
+const UrlTable = (props: Props) => {
+    const {
+        urls,
+        onToggleStatus,
+        onDeleteUrl,
+        isBulkAddMode,
+        isBulkRemoveMode,
+    } = props;
+
     const [expandedUrl, setExpandedUrl] = useState("");
+    const [isCheckedGlobal, setIsCheckedGlobal] = useState(false);
+    const [selectedUrlIds, setSelectedUrlIds] = useState<string[]>([]);
 
     const handleToggleExpandRow = (urlId: string) => {
         setExpandedUrl(expandedUrl === urlId ? "" : urlId);
+    };
+
+    const handleSelectAll = () => {
+        if (isCheckedGlobal) {
+            setIsCheckedGlobal(false);
+            setSelectedUrlIds([]);
+        } else {
+            setIsCheckedGlobal(true);
+            setSelectedUrlIds(urls.map((url) => url._id));
+        }
+    };
+
+    const toggleSelectUrl = (urlId: string) => {
+        setSelectedUrlIds((prev) => {
+            if (prev.includes(urlId)) {
+                setIsCheckedGlobal(false);
+                return (prev = prev.filter((id) => urlId !== id));
+            } else {
+                return (prev = [...prev, urlId]);
+            }
+        });
     };
 
     return (
         <table className="w-full border-collapse">
             <thead className="bg-zinc-50/50 border-b border-zinc-100">
                 <tr>
-                    <th className="pl-6 py-4 w-12"></th>
+                    <th className="relative px-6 py-4 w-12">
+                        {(isBulkAddMode || isBulkRemoveMode) && (
+                            <div className="absolute bottom-2">
+                                <input
+                                    checked={isCheckedGlobal}
+                                    onChange={handleSelectAll}
+                                    type="checkbox"
+                                />
+                            </div>
+                        )}
+                    </th>
 
                     <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                         Source Destination
@@ -56,6 +99,10 @@ const UrlTable = ({ urls, onToggleStatus, onDeleteUrl }: Props) => {
                         onDeleteUrl={onDeleteUrl}
                         expandedUrl={expandedUrl}
                         onToggleExpandRow={() => handleToggleExpandRow(url._id)}
+                        isBulkAddMode={isBulkAddMode}
+                        isBulkRemoveMode={isBulkRemoveMode}
+                        selectedUrlIds={selectedUrlIds}
+                        onToggleSelectUrl={toggleSelectUrl}
                     />
                 ))}
             </tbody>

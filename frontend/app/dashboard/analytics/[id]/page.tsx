@@ -153,7 +153,7 @@ const AnalyticsForUrl = () => {
                                     <span>
                                         {exporting
                                             ? "Exporting..."
-                                            : "Export Analysis"}
+                                            : "Export Analytics"}
                                     </span>
                                 </button>
                             </div>

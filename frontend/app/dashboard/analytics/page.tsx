@@ -144,7 +144,7 @@ const Analytics = () => {
                         <ArrowDownTrayIcon className="w-4 h-4 transition-transform" />
 
                         <span>
-                            {exporting ? "Exporting..." : "Export Analysis"}
+                            {exporting ? "Exporting..." : "Export Analytics"}
                         </span>
                     </button>
                 </header>

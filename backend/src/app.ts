@@ -21,10 +21,14 @@ import urlRouter from "./routers/url.router";
 import redirectRouter from "./routers/redirect.router";
 import { CLIENT_URL } from "./config/env";
 
+import groupRouter from "./routers/group.router";
+
 app.use("/api/v1/healthcheck", healthCheckRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/url", urlRouter);
 app.use("/", redirectRouter);
+
+app.use("/api/v1/group", groupRouter);
 
 app.use(errorHandler);
 

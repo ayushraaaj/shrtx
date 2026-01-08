@@ -15,6 +15,7 @@ import {
     ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import ExportModal from "@/components/dashboard/ExportModal";
+import ExportGroupUrlModal from "@/components/dashboard/ExportGroupUrlModal";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -27,6 +28,15 @@ const Dashboard = () => {
     const [searchText, setSearchText] = useState("");
     const [showExportModal, setShowExportModal] = useState(false);
 
+    const [urlGroups, setUrlGroups] = useState([]);
+    const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+    const [selectedGroup, setSelectedGroup] = useState("all");
+    const [addUrlDone, setAddUrlDone] = useState("Add URLs");
+    const [removeUrlDone, setRemoveUrlDone] = useState("Remove URLs");
+    // const [createGroup, setCreateGroup] = useState("");
+    const [isBulkAddMode, setIsBulkAddMode] = useState(false);
+    const [isBulkRemoveMode, setIsBulkRemoveMode] = useState(false);
+
     const isValidUrl = (url: string) => {
         try {
             const parsed = new URL(url);
@@ -37,6 +47,10 @@ const Dashboard = () => {
     };
 
     const onShortUrl = async () => {
+        if (isBulkAddMode || isBulkRemoveMode) {
+            return;
+        }
+
         if (!isValidUrl(originalUrl)) {
             setResponse({
                 message: "Please enter a valid URL (include http/https)",
@@ -152,6 +166,84 @@ const Dashboard = () => {
         }
     };
 
+    const onAddUrlsDone = async () => {
+        if (
+            selectedGroup === "all" ||
+            selectedGroup === "ungrouped" ||
+            selectedGroup === "createGroup"
+        ) {
+            return;
+        }
+
+        try {
+            if (addUrlDone === "Add URLs") {
+                setAddUrlDone("Done");
+                setIsBulkAddMode(true);
+            } else {
+                setAddUrlDone("Add URLs");
+                setIsBulkAddMode(false);
+            }
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
+            }
+        }
+    };
+
+    const onRemoveUrlsDone = () => {
+        if (
+            selectedGroup === "all" ||
+            selectedGroup === "ungrouped" ||
+            selectedGroup === "createGroup"
+        ) {
+            return;
+        }
+
+        try {
+            if (removeUrlDone === "Remove URLs") {
+                setRemoveUrlDone("Done");
+                setIsBulkRemoveMode(true);
+            } else {
+                setRemoveUrlDone("Remove URLs");
+                setIsBulkRemoveMode(false);
+            }
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
+            }
+        }
+    };
+
+    const fetchAllGroups = async () => {
+        try {
+            const res = await api.get("/group/get-all");
+            console.log(res.data.data);
+            setUrlGroups(res.data.data);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                setResponse({
+                    message:
+                        error.response?.data.message ?? "Something went wrong",
+                    shortUrl: "",
+                });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
+            }
+        }
+    };
+
     useEffect(() => {
         setButtonDisabled(originalUrl.length === 0);
     }, [originalUrl]);
@@ -170,6 +262,10 @@ const Dashboard = () => {
         }, 5000);
         return () => clearTimeout(timer);
     }, [response.message]);
+
+    useEffect(() => {
+        fetchAllGroups();
+    }, []);
 
     return (
         <div className="min-h-screen bg-zinc-50 pb-20 font-sans">
@@ -286,6 +382,46 @@ const Dashboard = () => {
                         </h2>
 
                         <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <select
+                                disabled={isBulkAddMode || isBulkRemoveMode}
+                                value={selectedGroup}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+
+                                    if (value === "createGroup") {
+                                        setShowCreateGroupModal(true);
+                                        return;
+                                    }
+
+                                    setSelectedGroup(value);
+                                }}
+                            >
+                                <option value="all">All</option>
+                                <option value="ungrouped">Ungrouped </option>
+                                {urlGroups.map((group: any) => (
+                                    <option
+                                        key={group.groupName}
+                                        value={group.groupName}
+                                    >
+                                        {group.groupName}
+                                    </option>
+                                ))}
+                                <option value="createGroup">
+                                    + Create Group
+                                </option>
+                            </select>
+                            <button
+                                disabled={removeUrlDone === "Done"}
+                                onClick={onAddUrlsDone}
+                            >
+                                {addUrlDone}
+                            </button>
+                            <button
+                                disabled={addUrlDone == "Done"}
+                                onClick={onRemoveUrlsDone}
+                            >
+                                {removeUrlDone}
+                            </button>
                             <button
                                 onClick={() => setShowExportModal(true)}
                                 className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm active:scale-95 cursor-pointer"
@@ -316,6 +452,8 @@ const Dashboard = () => {
                             urls={urls}
                             onToggleStatus={onToggleStatus}
                             onDeleteUrl={onDeleteUrl}
+                            isBulkAddMode={isBulkAddMode}
+                            isBulkRemoveMode={isBulkRemoveMode}
                         />
                         {urls.length === 0 && !loading && (
                             <div className="py-20 flex flex-col items-center text-center">
@@ -350,6 +488,13 @@ const Dashboard = () => {
 
             {showExportModal && (
                 <ExportModal onCloseModal={() => setShowExportModal(false)} />
+            )}
+
+            {showCreateGroupModal && (
+                <ExportGroupUrlModal
+                    onCloseUrlModal={() => setShowCreateGroupModal(false)}
+                    fetchAllGroups={fetchAllGroups}
+                />
             )}
         </div>
     );

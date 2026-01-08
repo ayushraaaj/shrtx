@@ -29,6 +29,6 @@ router.route("/export").get(exportUrls);
 router.route("/analytics/overview").get(getAllUrlAnalytics);
 router.route("/analytics/:id").get(getUrlAnalytics);
 router.route("/analytics/:id/export/pdf").post(exportUrlAnalytics);
-router.route("/analytics/export/overview/pdf").post(exportAllUrlsAnalytics)
+router.route("/analytics/export/overview/pdf").post(exportAllUrlsAnalytics);
 
 export default router;

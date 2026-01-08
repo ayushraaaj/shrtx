@@ -44,6 +44,11 @@ const urlSchema = new mongoose.Schema<IUrl>(
                 createdAt: Date,
             },
         ],
+        group: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Group",
+            default: null,
+        },
     },
     { timestamps: true }
 );

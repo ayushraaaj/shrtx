@@ -226,16 +226,37 @@ interface Props {
     onDeleteUrl(urlId: string): void;
     expandedUrl: string;
     onToggleExpandRow(): void;
+    isBulkAddMode: boolean;
+    isBulkRemoveMode: boolean;
+    selectedUrlIds: string[];
+    onToggleSelectUrl(urlId: string): void;
+    
 }
 
 const UrlTableRow = (props: Props) => {
-    const { url, onToggleStatus, onDeleteUrl, expandedUrl, onToggleExpandRow } =
-        props;
+    const {
+        url,
+        onToggleStatus,
+        onDeleteUrl,
+        expandedUrl,
+        onToggleExpandRow,
+        isBulkAddMode,
+        isBulkRemoveMode,
+        selectedUrlIds,
+        onToggleSelectUrl,
+   
+    } = props;
+
     const isExpanded = expandedUrl === url._id;
+
     const router = useRouter();
 
     const analyticsForUrl = (urlId: string) => {
         router.push(`/dashboard/analytics/${urlId}`);
+    };
+
+    const handleChange = () => {
+        onToggleSelectUrl(url._id);
     };
 
     return (
@@ -245,16 +266,26 @@ const UrlTableRow = (props: Props) => {
                     isExpanded ? "bg-zinc-50/50" : ""
                 }`}
             >
-                <td
-                    className="pl-6 py-4 w-12 cursor-pointer"
-                    onClick={onToggleExpandRow}
-                >
-                    <ChevronRightIcon
-                        className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${
-                            isExpanded ? "rotate-90 text-blue-600" : ""
-                        }`}
-                    />
-                </td>
+                {isBulkAddMode || isBulkRemoveMode ? (
+                    <td className="pl-6 py-4 w-12">
+                        <input
+                            checked={selectedUrlIds.includes(url._id)}
+                            onChange={handleChange}
+                            type="checkbox"
+                        />
+                    </td>
+                ) : (
+                    <td
+                        className="pl-6 py-4 w-12 cursor-pointer"
+                        onClick={onToggleExpandRow}
+                    >
+                        <ChevronRightIcon
+                            className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${
+                                isExpanded ? "rotate-90 text-blue-600" : ""
+                            }`}
+                        />
+                    </td>
+                )}
 
                 <td className="px-6 py-4 min-w-[280px]">
                     <div className="flex items-center gap-3">
