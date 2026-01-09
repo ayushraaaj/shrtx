@@ -38,6 +38,7 @@ const Dashboard = () => {
     const [isBulkRemoveMode, setIsBulkRemoveMode] = useState(false);
 
     const [selectedUrlIds, setSelectedUrlIds] = useState<string[]>([]);
+    const [isCheckedGlobal, setIsCheckedGlobal] = useState(false);
 
     const isValidUrl = (url: string) => {
         try {
@@ -193,7 +194,7 @@ const Dashboard = () => {
 
                 setResponse({ message: res.data.message, shortUrl: "" });
 
-                fetchAllUrls(1, selectedGroup)
+                fetchAllUrls(1, selectedGroup);
                 setAddUrlDone("Add URLs");
                 setIsBulkAddMode(false);
             }
@@ -210,7 +211,7 @@ const Dashboard = () => {
         }
     };
 
-    const onRemoveUrlsDone = () => {
+    const onRemoveUrlsDone = async () => {
         if (
             selectedGroup === "all" ||
             selectedGroup === "ungrouped" ||
@@ -224,6 +225,14 @@ const Dashboard = () => {
                 setRemoveUrlDone("Done");
                 setIsBulkRemoveMode(true);
             } else {
+                const res = await api.post("/group/remove-bulk", {
+                    groupName: selectedGroup,
+                    urlIds: selectedUrlIds,
+                });
+
+                setResponse({ message: res.data.message, shortUrl: "" });
+
+                fetchAllUrls(1, selectedGroup);
                 setRemoveUrlDone("Remove URLs");
                 setIsBulkRemoveMode(false);
             }
@@ -284,6 +293,7 @@ const Dashboard = () => {
     useEffect(() => {
         if (!isBulkAddMode || !isBulkRemoveMode) {
             setSelectedUrlIds([]);
+            setIsCheckedGlobal(false);
         }
     }, [isBulkAddMode, isBulkRemoveMode]);
 
@@ -476,6 +486,8 @@ const Dashboard = () => {
                             isBulkRemoveMode={isBulkRemoveMode}
                             selectedUrlIds={selectedUrlIds}
                             setSelectedUrlIds={setSelectedUrlIds}
+                            isCheckedGlobal={isCheckedGlobal}
+                            setIsCheckedGlobal={setIsCheckedGlobal}
                         />
                         {urls.length === 0 && !loading && (
                             <div className="py-20 flex flex-col items-center text-center">

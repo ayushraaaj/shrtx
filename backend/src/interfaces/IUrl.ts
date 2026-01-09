@@ -25,5 +25,5 @@ export interface UrlQuery {
         { originalUrl: { $regex: string; $options: string } },
         { shortCode: { $regex: string; $options: string } }
     ];
-    groupId?: Types.ObjectId;
+    groupId?: Types.ObjectId | null;
 }

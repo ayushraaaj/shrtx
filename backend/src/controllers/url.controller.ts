@@ -132,7 +132,7 @@ export const getAllUrlDetails = asyncHandler(
 
         if (groupName && groupName !== "all") {
             if (groupName === "ungrouped") {
-                query.groupId = undefined;
+                query.groupId = null;
             } else {
                 const groupDoc = await Group.findOne({
                     groupName,

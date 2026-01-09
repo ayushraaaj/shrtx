@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { UrlApiItem } from "@/app/interfaces/url";
 import UrlTableRow from "./UrlTableRow";
 
@@ -11,6 +11,8 @@ interface Props {
     isBulkRemoveMode: boolean;
     selectedUrlIds: string[];
     setSelectedUrlIds: React.Dispatch<React.SetStateAction<string[]>>;
+    isCheckedGlobal: boolean;
+    setIsCheckedGlobal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UrlTable = (props: Props) => {
@@ -22,10 +24,11 @@ const UrlTable = (props: Props) => {
         isBulkRemoveMode,
         selectedUrlIds,
         setSelectedUrlIds,
+        isCheckedGlobal,
+        setIsCheckedGlobal,
     } = props;
 
     const [expandedUrl, setExpandedUrl] = useState("");
-    const [isCheckedGlobal, setIsCheckedGlobal] = useState(false);
 
     const handleToggleExpandRow = (urlId: string) => {
         setExpandedUrl(expandedUrl === urlId ? "" : urlId);

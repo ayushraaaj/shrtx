@@ -63,10 +63,40 @@ export const bulkAssignUrlsToGroup = asyncHandler(
             { $set: { groupId: group._id } }
         );
 
-        return res.status(200).json(
-            new ApiResponse(`Urls successfully assigned to ${groupName}`, {
-                count: urlDoc.modifiedCount,
-            })
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    `Urls successfully assigned to ${groupName}`,
+                    {}
+                )
+            );
+    }
+);
+
+export const bulkRemoveUrlsFromGroup = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { groupName, urlIds } = req.body;
+        const userId = req.user?._id;
+
+        const group = await Group.findOne({ groupName, owner: userId });
+
+        if (!group) {
+            throw new ApiError(404, "Group not found");
+        }
+
+        const urlDoc = await Url.updateMany(
+            { _id: { $in: urlIds }, owner: userId },
+            { $set: { groupId: null } }
         );
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    `Urls successfully removed from ${groupName}`,
+                    {}
+                )
+            );
     }
 );
