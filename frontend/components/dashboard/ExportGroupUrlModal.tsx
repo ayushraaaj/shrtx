@@ -1,4 +1,5 @@
 import { api } from "@/lib/axios";
+import axios from "axios";
 import { useState } from "react";
 
 interface Props {
@@ -21,11 +22,17 @@ const ExportGroupUrlModal = (props: Props) => {
 
             const res = await api.post("/group/create", { groupName });
 
-            console.log(res.data);
-
             onCloseUrlModal();
             fetchAllGroups();
-        } catch (error) {}
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                setError(
+                    error.response?.data.message ?? "Something went wrong"
+                );
+            } else {
+                setError("Unexpected error");
+            }
+        }
     };
 
     return (
