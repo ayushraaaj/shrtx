@@ -48,9 +48,9 @@ export const bulkAssignUrlsToGroup = asyncHandler(
         const { groupName, urlIds } = req.body;
         const userId = req.user?._id;
 
-        if (urlIds.length === 0) {
-            throw new ApiError(400, "Invalid");
-        }
+        // if (urlIds.length === 0) {
+        //     throw new ApiError(400, "Invalid");
+        // }
 
         const group = await Group.findOne({ groupName, owner: userId });
 

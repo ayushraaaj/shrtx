@@ -9,6 +9,8 @@ interface Props {
     onDeleteUrl(urlId: string): void;
     isBulkAddMode: boolean;
     isBulkRemoveMode: boolean;
+    selectedUrlIds: string[];
+    setSelectedUrlIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const UrlTable = (props: Props) => {
@@ -18,11 +20,12 @@ const UrlTable = (props: Props) => {
         onDeleteUrl,
         isBulkAddMode,
         isBulkRemoveMode,
+        selectedUrlIds,
+        setSelectedUrlIds,
     } = props;
 
     const [expandedUrl, setExpandedUrl] = useState("");
     const [isCheckedGlobal, setIsCheckedGlobal] = useState(false);
-    const [selectedUrlIds, setSelectedUrlIds] = useState<string[]>([]);
 
     const handleToggleExpandRow = (urlId: string) => {
         setExpandedUrl(expandedUrl === urlId ? "" : urlId);

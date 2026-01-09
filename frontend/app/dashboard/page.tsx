@@ -37,6 +37,8 @@ const Dashboard = () => {
     const [isBulkAddMode, setIsBulkAddMode] = useState(false);
     const [isBulkRemoveMode, setIsBulkRemoveMode] = useState(false);
 
+    const [selectedUrlIds, setSelectedUrlIds] = useState<string[]>([]);
+
     const isValidUrl = (url: string) => {
         try {
             const parsed = new URL(url);
@@ -86,11 +88,14 @@ const Dashboard = () => {
         }
     };
 
-    const fetchAllUrls = async (pageNumber: number) => {
+    const fetchAllUrls = async (pageNumber: number, group?: string) => {
         try {
             setLoading(true);
+
+            const activeGroup = group ?? selectedGroup;
+
             const res = await api.get(
-                `/url/get-all?page=${pageNumber}&search=${searchText}`
+                `/url/get-all?page=${pageNumber}&search=${searchText}&group=${activeGroup}`
             );
 
             const urlsData = res.data.data.urls;
@@ -177,9 +182,18 @@ const Dashboard = () => {
 
         try {
             if (addUrlDone === "Add URLs") {
+                fetchAllUrls(1, "ungrouped");
                 setAddUrlDone("Done");
                 setIsBulkAddMode(true);
             } else {
+                const res = await api.post("/group/assign-bulk", {
+                    groupName: selectedGroup,
+                    urlIds: selectedUrlIds,
+                });
+
+                setResponse({ message: res.data.message, shortUrl: "" });
+
+                fetchAllUrls(1, selectedGroup)
                 setAddUrlDone("Add URLs");
                 setIsBulkAddMode(false);
             }
@@ -252,7 +266,7 @@ const Dashboard = () => {
         setPage(1);
         setIsRemaining(true);
         fetchAllUrls(1);
-    }, [searchText]);
+    }, [searchText, selectedGroup]);
 
     useEffect(() => {
         if (!response.message) return;
@@ -266,6 +280,12 @@ const Dashboard = () => {
     useEffect(() => {
         fetchAllGroups();
     }, []);
+
+    useEffect(() => {
+        if (!isBulkAddMode || !isBulkRemoveMode) {
+            setSelectedUrlIds([]);
+        }
+    }, [isBulkAddMode, isBulkRemoveMode]);
 
     return (
         <div className="min-h-screen bg-zinc-50 pb-20 font-sans">
@@ -454,6 +474,8 @@ const Dashboard = () => {
                             onDeleteUrl={onDeleteUrl}
                             isBulkAddMode={isBulkAddMode}
                             isBulkRemoveMode={isBulkRemoveMode}
+                            selectedUrlIds={selectedUrlIds}
+                            setSelectedUrlIds={setSelectedUrlIds}
                         />
                         {urls.length === 0 && !loading && (
                             <div className="py-20 flex flex-col items-center text-center">

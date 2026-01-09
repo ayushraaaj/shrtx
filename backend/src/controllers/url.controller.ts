@@ -10,6 +10,7 @@ import ExcelJS from "exceljs";
 import QRCode from "qrcode";
 import { Types } from "mongoose";
 import PDFDocument from "pdfkit";
+import { Group } from "../models/group.model";
 
 const isValidUrl = (url: string) => {
     try {
@@ -112,6 +113,8 @@ export const getAllUrlDetails = asyncHandler(
             throw new ApiError(401, "Unauthorized");
         }
 
+        const groupName = req.query.group;
+
         const page = Number(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
@@ -125,6 +128,23 @@ export const getAllUrlDetails = asyncHandler(
                 { originalUrl: { $regex: search, $options: "i" } },
                 { shortCode: { $regex: search, $options: "i" } },
             ];
+        }
+
+        if (groupName && groupName !== "all") {
+            if (groupName === "ungrouped") {
+                query.groupId = undefined;
+            } else {
+                const groupDoc = await Group.findOne({
+                    groupName,
+                    owner: userId,
+                }).select("_id");
+
+                if (!groupDoc) {
+                    throw new ApiError(404, "Group not found");
+                }
+
+                query.groupId = groupDoc._id;
+            }
         }
 
         const urls = await Url.find(query)

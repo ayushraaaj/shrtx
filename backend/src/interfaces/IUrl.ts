@@ -16,7 +16,7 @@ export interface IUrl extends Document {
     isActive: boolean;
     createdAt: string;
     refs: IUrlRef[];
-    group: Types.ObjectId
+    groupId: Types.ObjectId;
 }
 
 export interface UrlQuery {
@@ -25,4 +25,5 @@ export interface UrlQuery {
         { originalUrl: { $regex: string; $options: string } },
         { shortCode: { $regex: string; $options: string } }
     ];
+    groupId?: Types.ObjectId;
 }
