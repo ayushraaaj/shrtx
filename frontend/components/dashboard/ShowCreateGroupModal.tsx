@@ -3,12 +3,12 @@ import axios from "axios";
 import { useState } from "react";
 
 interface Props {
-    onCloseUrlModal(): void;
+    onCloseGroupModal(): void;
     fetchAllGroups(): void;
 }
 
-const ExportGroupUrlModal = (props: Props) => {
-    const { onCloseUrlModal, fetchAllGroups } = props;
+const ShowCreateGroupModal = (props: Props) => {
+    const { onCloseGroupModal, fetchAllGroups } = props;
 
     const [groupName, setGroupName] = useState("");
     const [error, setError] = useState("");
@@ -22,7 +22,7 @@ const ExportGroupUrlModal = (props: Props) => {
 
             const res = await api.post("/group/create", { groupName });
 
-            onCloseUrlModal();
+            onCloseGroupModal();
             fetchAllGroups();
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -60,7 +60,7 @@ const ExportGroupUrlModal = (props: Props) => {
 
                 <div className="flex justify-end gap-3">
                     <button
-                        onClick={onCloseUrlModal}
+                        onClick={onCloseGroupModal}
                         className="px-4 py-2 border rounded"
                     >
                         Cancel
@@ -78,4 +78,4 @@ const ExportGroupUrlModal = (props: Props) => {
     );
 };
 
-export default ExportGroupUrlModal;
+export default ShowCreateGroupModal;

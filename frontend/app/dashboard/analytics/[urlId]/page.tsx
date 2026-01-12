@@ -17,7 +17,7 @@ import ChartsCard from "@/components/analytics/ChartsCard";
 import * as htmlToImage from "html-to-image";
 
 const AnalyticsForUrl = () => {
-    const { id } = useParams();
+    const { urlId } = useParams();
 
     const barChartRef = useRef<HTMLDivElement>(null);
     const pieChartRef = useRef<HTMLDivElement>(null);
@@ -48,7 +48,7 @@ const AnalyticsForUrl = () => {
             const pieChartImage = await captureChart(pieChartRef);
 
             const res = await api.post(
-                `/url/analytics/${id}/export/pdf`,
+                `/url/analytics/${urlId}/export/pdf`,
                 {
                     charts: {
                         bar: barChartImage,
@@ -84,7 +84,7 @@ const AnalyticsForUrl = () => {
     const fetchUrlData = async () => {
         try {
             setLoading(true);
-            const res = await api.get(`/url/analytics/${id}`);
+            const res = await api.get(`/url/analytics/${urlId}`);
             setUrlData(res.data.data);
         } catch (error) {
             console.error("Failed to fetch analytics", error);
@@ -94,8 +94,8 @@ const AnalyticsForUrl = () => {
     };
 
     useEffect(() => {
-        if (id) fetchUrlData();
-    }, [id]);
+        if (urlId) fetchUrlData();
+    }, [urlId]);
 
     if (loading) {
         return (
@@ -120,7 +120,7 @@ const AnalyticsForUrl = () => {
                         href="/dashboard"
                         className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition-colors font-bold text-sm group"
                     >
-                        <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        <ArrowLeftIcon className="w-4 h-4" />
                         Back to Dashboard
                     </Link>
 

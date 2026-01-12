@@ -4,6 +4,7 @@ import {
     Squares2X2Icon,
     ChartBarIcon,
     LinkIcon,
+    TagIcon
 } from "@heroicons/react/24/outline";
 import Logout from "../logout/Logout";
 import Link from "next/link";
@@ -37,6 +38,12 @@ const Sidebar = () => {
                     label="Analytics"
                     icon={<ChartBarIcon className="w-5 h-5" />}
                 />
+                <SidebarItem
+                    href="/dashboard/groups"
+                    label="Groups"
+                    icon={<TagIcon className="w-5 h-5" />}
+                />
+                
             </nav>
 
             <div className="p-4 border-t border-zinc-50">

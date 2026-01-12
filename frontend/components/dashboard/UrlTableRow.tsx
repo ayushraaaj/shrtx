@@ -396,10 +396,12 @@ const UrlTableRow = (props: Props) => {
                                                     {ref.source}
                                                 </span>
                                                 <span className="text-[10px] truncate pr-4 text-zinc-400">
-                                                    {refUrl.replace(
-                                                        /(^\w+:|^)\/\//,
-                                                        ""
-                                                    )}
+                                                    <Link href={refUrl} target="_blank">
+                                                        {refUrl.replace(
+                                                            /(^\w+:|^)\/\//,
+                                                            ""
+                                                        )}
+                                                    </Link>
                                                 </span>
                                             </div>
 

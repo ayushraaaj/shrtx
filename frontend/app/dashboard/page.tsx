@@ -15,7 +15,7 @@ import {
     ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import ExportModal from "@/components/dashboard/ExportModal";
-import ExportGroupUrlModal from "@/components/dashboard/ExportGroupUrlModal";
+import ShowCreateGroupModal from "@/components/dashboard/ShowCreateGroupModal";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -126,10 +126,12 @@ const Dashboard = () => {
         }
     };
 
-    const loadMore = () => {
+    const loadMore = (group?: string) => {
+        const activeGroup = group ?? selectedGroup;
+
         const nextPage = page + 1;
         setPage(nextPage);
-        fetchAllUrls(nextPage);
+        fetchAllUrls(nextPage, activeGroup);
     };
 
     const onToggleStatus = async (urlId: string) => {
@@ -156,7 +158,9 @@ const Dashboard = () => {
         const confirmDelete = confirm(
             "Are you sure you want to delete this URL?"
         );
-        if (!confirmDelete) return;
+        if (!confirmDelete) {
+            return;
+        }
 
         try {
             await api.delete(`/url/${urlId}/delete`);
@@ -168,6 +172,8 @@ const Dashboard = () => {
                         error.response?.data.message ?? "Something went wrong",
                     shortUrl: "",
                 });
+            } else {
+                setResponse({ message: "Unexpected error", shortUrl: "" });
             }
         }
     };
@@ -183,7 +189,6 @@ const Dashboard = () => {
 
         try {
             if (addUrlDone === "Add URLs") {
-                fetchAllUrls(1, "ungrouped");
                 setAddUrlDone("Done");
                 setIsBulkAddMode(true);
             } else {
@@ -252,7 +257,7 @@ const Dashboard = () => {
     const fetchAllGroups = async () => {
         try {
             const res = await api.get("/group/get-all");
-            console.log(res.data.data);
+            // console.log(res.data.data);
             setUrlGroups(res.data.data);
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -272,10 +277,15 @@ const Dashboard = () => {
     }, [originalUrl]);
 
     useEffect(() => {
+        if (addUrlDone === "Done") {
+            fetchAllUrls(1, "ungrouped");
+        } else {
+            fetchAllUrls(1);
+        }
+
         setPage(1);
         setIsRemaining(true);
-        fetchAllUrls(1);
-    }, [searchText, selectedGroup]);
+    }, [searchText, selectedGroup, addUrlDone]);
 
     useEffect(() => {
         if (!response.message) return;
@@ -508,7 +518,13 @@ const Dashboard = () => {
                         <div className="p-6 border-t border-zinc-100 flex justify-center">
                             <button
                                 className="cursor-pointer text-sm font-bold text-zinc-600 hover:text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-xl transition-all disabled:opacity-50"
-                                onClick={loadMore}
+                                onClick={() => {
+                                    if (addUrlDone == "Done") {
+                                        loadMore("ungrouped");
+                                    } else {
+                                        loadMore();
+                                    }
+                                }}
                                 disabled={loading}
                             >
                                 {loading
@@ -525,8 +541,8 @@ const Dashboard = () => {
             )}
 
             {showCreateGroupModal && (
-                <ExportGroupUrlModal
-                    onCloseUrlModal={() => setShowCreateGroupModal(false)}
+                <ShowCreateGroupModal
+                    onCloseGroupModal={() => setShowCreateGroupModal(false)}
                     fetchAllGroups={fetchAllGroups}
                 />
             )}
