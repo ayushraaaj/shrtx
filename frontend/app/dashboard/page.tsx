@@ -272,6 +272,9 @@ const Dashboard = () => {
         }
     };
 
+    const truncate = (text: string, max = 25) =>
+        text.length > max ? text.slice(0, max) + "…" : text;
+
     useEffect(() => {
         setButtonDisabled(originalUrl.length === 0);
     }, [originalUrl]);
@@ -323,7 +326,7 @@ const Dashboard = () => {
 
                 <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">
                     <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
+                        <div className="relative flex-1 flex">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <LinkIcon className="h-5 w-5 text-zinc-400" />
                             </div>
@@ -334,6 +337,8 @@ const Dashboard = () => {
                                 onChange={(e) => setOriginalUrl(e.target.value)}
                                 placeholder="Paste your long link here..."
                             />
+                            /
+                            <input type="text" placeholder="Custom name" />
                         </div>
                         <button
                             className={`px-10 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
@@ -436,15 +441,20 @@ const Dashboard = () => {
                                         setSelectedGroup(value);
                                     }}
                                 >
-                                    <option value="all">All Links</option>
-                                    <option value="ungrouped">Ungrouped</option>
+                                    <option title="All Links" value="all">
+                                        All Links
+                                    </option>
+                                    <option title="Ungrouped" value="ungrouped">
+                                        Ungrouped
+                                    </option>
                                     <optgroup label="Groups">
                                         {urlGroups.map((group: any) => (
                                             <option
+                                                title={group.groupName}
                                                 key={group.groupName}
                                                 value={group.groupName}
                                             >
-                                                {group.groupName}
+                                                {truncate(group.groupName, 10)}
                                             </option>
                                         ))}
                                     </optgroup>

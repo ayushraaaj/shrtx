@@ -92,6 +92,9 @@ const Groups = () => {
         } catch (error) {}
     };
 
+    const truncate = (text: string, max: number) =>
+        text.length > max ? text.slice(0, max) + "..." : text;
+
     useEffect(() => {
         fetchAllGroups();
     }, []);
@@ -153,14 +156,11 @@ const Groups = () => {
                                 }`}
                             >
                                 <div className="flex-1">
-                                    <Link
-                                        className="flex items-center gap-4"
-                                        href={`/dashboard/analytics/group/${group._id}`}
-                                    >
-                                        <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                                            <FolderIcon className="w-5 h-5" />
-                                        </div>
-                                        {editingGroupId === group._id ? (
+                                    {editingGroupId === group._id ? (
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                                <FolderIcon className="w-5 h-5" />
+                                            </div>
                                             <input
                                                 ref={
                                                     editingGroupId === group._id
@@ -193,14 +193,23 @@ const Groups = () => {
                                                         : "cursor-default"
                                                 }`}
                                             ></input>
-                                        ) : (
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            className="flex items-center gap-4"
+                                            href={`/dashboard/analytics/group/${group._id}`}
+                                        >
+                                            <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                                <FolderIcon className="w-5 h-5" />
+                                            </div>
                                             <span
                                                 className={`font-bold text-zinc-800 tracking-tight bg-transparent outline-none w-full`}
+                                                title={group.groupName}
                                             >
-                                                {group.groupName}
+                                                {truncate(group.groupName, 80)}
                                             </span>
-                                        )}
-                                    </Link>
+                                        </Link>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center gap-1">

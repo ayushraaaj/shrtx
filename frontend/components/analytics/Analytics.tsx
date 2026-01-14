@@ -113,6 +113,9 @@ const Analytics = (props: Props) => {
         }
     };
 
+    const truncate = (text: string, max: number) =>
+        text.length > max ? text.slice(0, max) + "..." : text;
+
     useEffect(() => {
         fetchAllUrlData();
     }, []);
@@ -139,8 +142,9 @@ const Analytics = (props: Props) => {
                             <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/20">
                                 <ChartBarIcon className="w-5 h-5 text-white" />
                             </div>
-                            <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
-                                {heading} {groupName && `(${groupName})`}
+                            <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight" title={ groupName}>
+                                {heading}{" "}
+                                {groupName && `(${truncate(groupName, 40)})`}
                             </h1>
                         </div>
                         <p className="text-zinc-500 font-medium">
