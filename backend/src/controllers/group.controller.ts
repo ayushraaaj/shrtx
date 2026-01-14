@@ -4,6 +4,7 @@ import { Group } from "../models/group.model";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { Url } from "../models/url.model";
+import { getAllUrlAnalyticsData } from "./url.controller";
 
 export const createGroupName = asyncHandler(
     async (req: Request, res: Response) => {
@@ -148,5 +149,36 @@ export const updateGroupName = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("Successfully updated group name", {}));
+    }
+);
+
+export const groupAnalytics = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const { groupId } = req.params;
+
+        if (!userId) {
+            throw new ApiError(401, "Unauthorized");
+        }
+
+        const group = await Group.findOne({
+            _id: groupId,
+            owner: userId,
+        }).lean();
+
+        if (!group) {
+            throw new ApiError(404, "Group not found");
+        }
+
+        const response = await getAllUrlAnalyticsData(userId, group._id);
+
+        const groupName = group.groupName;
+
+        return res.status(200).json(
+            new ApiResponse("Group analytics fetched successfully", {
+                ...response,
+                groupName,
+            })
+        );
     }
 );

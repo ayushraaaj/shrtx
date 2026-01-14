@@ -1,7 +1,13 @@
+"use client";
+import Analytics from "@/components/analytics/Analytics";
+import { useParams } from "next/navigation";
+
 const GroupUrlsAnalytics = () => {
+    const { groupId } = useParams();
+
     return (
         <div>
-            <h1>Group Urls Analytics</h1>
+            <Analytics fetchAnalyticsUrl={`/group/analytics/${groupId}`} heading="Group Analytics" />
         </div>
     );
 };

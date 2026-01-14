@@ -252,7 +252,7 @@ const UrlTableRow = (props: Props) => {
     const router = useRouter();
 
     const analyticsForUrl = (urlId: string) => {
-        router.push(`/dashboard/analytics/${urlId}`);
+        router.push(`/dashboard/analytics/url/${urlId}`);
     };
 
     const handleChange = () => {

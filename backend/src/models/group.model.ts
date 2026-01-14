@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IGroup } from "../interfaces/IGroup";
 
-const groupSchema = new mongoose.Schema(
+const groupSchema = new mongoose.Schema<IGroup>(
     {
         groupName: {
             type: String,
@@ -20,4 +20,4 @@ const groupSchema = new mongoose.Schema(
 
 groupSchema.index({ owner: 1, createdAt: -1 });
 
-export const Group = mongoose.model("groups", groupSchema);
+export const Group = mongoose.model<IGroup>("groups", groupSchema);

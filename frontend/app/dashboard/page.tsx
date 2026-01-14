@@ -422,46 +422,104 @@ const Dashboard = () => {
                         </h2>
 
                         <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <select
-                                disabled={isBulkAddMode || isBulkRemoveMode}
-                                value={selectedGroup}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-
-                                    if (value === "createGroup") {
-                                        setShowCreateGroupModal(true);
-                                        return;
-                                    }
-
-                                    setSelectedGroup(value);
-                                }}
-                            >
-                                <option value="all">All</option>
-                                <option value="ungrouped">Ungrouped </option>
-                                {urlGroups.map((group: any) => (
+                            <div className="relative">
+                                <select
+                                    className="appearance-none bg-white border border-zinc-200 pl-4 pr-10 py-2.5 rounded-xl text-sm font-bold text-zinc-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all cursor-pointer shadow-sm disabled:bg-zinc-50 disabled:text-zinc-400"
+                                    disabled={isBulkAddMode || isBulkRemoveMode}
+                                    value={selectedGroup}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === "createGroup") {
+                                            setShowCreateGroupModal(true);
+                                            return;
+                                        }
+                                        setSelectedGroup(value);
+                                    }}
+                                >
+                                    <option value="all">All Links</option>
+                                    <option value="ungrouped">Ungrouped</option>
+                                    <optgroup label="Groups">
+                                        {urlGroups.map((group: any) => (
+                                            <option
+                                                key={group.groupName}
+                                                value={group.groupName}
+                                            >
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </optgroup>
                                     <option
-                                        key={group.groupName}
-                                        value={group.groupName}
+                                        value="createGroup"
+                                        className="text-blue-600 font-bold"
                                     >
-                                        {group.groupName}
+                                        + New Group
                                     </option>
-                                ))}
-                                <option value="createGroup">
-                                    + Create Group
-                                </option>
-                            </select>
-                            <button
-                                disabled={removeUrlDone === "Done"}
-                                onClick={onAddUrlsDone}
-                            >
-                                {addUrlDone}
-                            </button>
-                            <button
-                                disabled={addUrlDone == "Done"}
-                                onClick={onRemoveUrlsDone}
-                            >
-                                {removeUrlDone}
-                            </button>
+                                </select>
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-zinc-400">
+                                    <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center bg-white border border-zinc-200 p-1 rounded-xl shadow-sm">
+                                <button
+                                    title={
+                                        addUrlDone === "Done"
+                                            ? "Save Selections"
+                                            : "Add URLs to Group"
+                                    }
+                                    disabled={removeUrlDone === "Done"}
+                                    onClick={onAddUrlsDone}
+                                    className={`p-2 rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                                        addUrlDone === "Done"
+                                            ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                                            : "text-zinc-500 hover:bg-zinc-100 hover:text-blue-600 disabled:opacity-20"
+                                    }`}
+                                >
+                                    {addUrlDone === "Done" ? (
+                                        <CheckCircleIcon className="w-5 h-5" />
+                                    ) : (
+                                        <PlusIcon className="w-5 h-5 stroke-[2.5]" />
+                                    )}
+                                </button>
+
+                                <div className="w-px h-4 bg-zinc-200 mx-1" />
+
+                                <button
+                                    title={
+                                        removeUrlDone === "Done"
+                                            ? "Confirm Removal"
+                                            : "Remove URLs from Group"
+                                    }
+                                    disabled={addUrlDone === "Done"}
+                                    onClick={onRemoveUrlsDone}
+                                    className={`p-2 rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                                        removeUrlDone === "Done"
+                                            ? "bg-red-600 text-white shadow-lg shadow-red-500/30 scale-105"
+                                            : "text-zinc-500 hover:bg-zinc-100 hover:text-red-600 disabled:opacity-20"
+                                    }`}
+                                >
+                                    {removeUrlDone === "Done" ? (
+                                        <CheckCircleIcon className="w-5 h-5" />
+                                    ) : (
+                                        <div className="w-5 h-5 flex items-center justify-center font-bold text-xl leading-none">
+                                            <span className="mb-1">−</span>
+                                        </div>
+                                    )}
+                                </button>
+                            </div>
+
                             <button
                                 onClick={() => setShowExportModal(true)}
                                 className="flex items-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm font-bold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm active:scale-95 cursor-pointer"

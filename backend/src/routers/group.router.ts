@@ -6,6 +6,7 @@ import {
     createGroupName,
     deleteGroup,
     getAllGroups,
+    groupAnalytics,
     updateGroupName,
 } from "../controllers/group.controller";
 
@@ -19,5 +20,6 @@ router.route("/assign-bulk").post(bulkAssignUrlsToGroup);
 router.route("/remove-bulk").post(bulkRemoveUrlsFromGroup);
 router.route("/:groupId/delete").delete(deleteGroup);
 router.route("/:groupId/update").patch(updateGroupName);
+router.route("/analytics/:groupId").get(groupAnalytics);
 
 export default router;

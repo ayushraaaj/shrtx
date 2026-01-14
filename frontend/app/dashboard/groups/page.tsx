@@ -152,41 +152,55 @@ const Groups = () => {
                                         : "border-zinc-200 hover:border-zinc-300 shadow-sm"
                                 }`}
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                                        <FolderIcon className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        ref={
-                                            editingGroupId === group._id
-                                                ? inputRef
-                                                : null
-                                        }
-                                        type="text"
-                                        value={
-                                            editingGroupId === group._id
-                                                ? newGroupName
-                                                : group.groupName
-                                        }
-                                        onChange={(e) =>
-                                            setNewGroupName(e.target.value)
-                                        }
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter") {
-                                                onUpdateGroupName();
-                                            }
-                                            if (e.key === "Escape") {
-                                                setEditingGroupId("");
-                                                setNewGroupName("");
-                                            }
-                                        }}
-                                        className={`font-bold text-zinc-800 tracking-tight bg-transparent outline-none w-full ${
-                                            editingGroupId === group._id
-                                                ? "cursor-text"
-                                                : "cursor-default"
-                                        }`}
-                                        disabled={editingGroupId !== group._id}
-                                    ></input>
+                                <div className="flex-1">
+                                    <Link
+                                        className="flex items-center gap-4"
+                                        href={`/dashboard/analytics/group/${group._id}`}
+                                    >
+                                        <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                            <FolderIcon className="w-5 h-5" />
+                                        </div>
+                                        {editingGroupId === group._id ? (
+                                            <input
+                                                ref={
+                                                    editingGroupId === group._id
+                                                        ? inputRef
+                                                        : null
+                                                }
+                                                type="text"
+                                                value={
+                                                    editingGroupId === group._id
+                                                        ? newGroupName
+                                                        : group.groupName
+                                                }
+                                                onChange={(e) =>
+                                                    setNewGroupName(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        onUpdateGroupName();
+                                                    }
+                                                    if (e.key === "Escape") {
+                                                        setEditingGroupId("");
+                                                        setNewGroupName("");
+                                                    }
+                                                }}
+                                                className={`font-bold text-zinc-800 tracking-tight bg-transparent outline-none w-full ${
+                                                    editingGroupId === group._id
+                                                        ? "cursor-text"
+                                                        : "cursor-default"
+                                                }`}
+                                            ></input>
+                                        ) : (
+                                            <span
+                                                className={`font-bold text-zinc-800 tracking-tight bg-transparent outline-none w-full`}
+                                            >
+                                                {group.groupName}
+                                            </span>
+                                        )}
+                                    </Link>
                                 </div>
 
                                 <div className="flex items-center gap-1">

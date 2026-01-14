@@ -441,8 +441,19 @@ export const exportUrlAnalytics = asyncHandler(
     }
 );
 
-const getAllUrlAnalyticsData = async (userId: Types.ObjectId) => {
-    const urlsDoc = await Url.find({ owner: userId })
+export const getAllUrlAnalyticsData = async (
+    userId: Types.ObjectId,
+    groupId?: Types.ObjectId
+) => {
+    const query: UrlQuery = {
+        owner: userId,
+    };
+
+    if (groupId) {
+        query.groupId = groupId;
+    }
+
+    const urlsDoc = await Url.find(query)
         .select("-_id clicks isActive refs.source refs.clicks")
         .lean();
 
@@ -513,7 +524,7 @@ export const getAllUrlAnalytics = asyncHandler(
 export const exportAllUrlsAnalytics = asyncHandler(
     async (req: Request, res: Response) => {
         const userId = req.user?._id;
-        const { charts } = req.body;
+        const { charts, heading, groupName } = req.body;
 
         if (!userId) {
             throw new ApiError(404, "Unauthorized");
@@ -526,12 +537,17 @@ export const exportAllUrlsAnalytics = asyncHandler(
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
-            "attachment; filename=all-url-analytics.pdf"
+            `attachment; filename=${heading}_${groupName}.pdf`
         );
 
         doc.pipe(res);
 
-        doc.fontSize(18).text("Analytics Overview", { align: "center" });
+        let pdfHeading = heading;
+        if (groupName) {
+            pdfHeading += ` (${groupName})`;
+        }
+
+        doc.fontSize(18).text(pdfHeading, { align: "center" });
         doc.moveDown();
 
         doc.fontSize(12);
