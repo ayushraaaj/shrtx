@@ -19,6 +19,8 @@ import ShowCreateGroupModal from "@/components/dashboard/ShowCreateGroupModal";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
+    const [customName, setCustomName] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState({ message: "", shortUrl: "" });
     const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -40,6 +42,15 @@ const Dashboard = () => {
     const [selectedUrlIds, setSelectedUrlIds] = useState<string[]>([]);
     const [isCheckedGlobal, setIsCheckedGlobal] = useState(false);
 
+    const RESERVED_WORDS = [
+        "dashboard",
+        "analytics",
+        "group",
+        "login",
+        "signup",
+        "api",
+    ];
+
     const isValidUrl = (url: string) => {
         try {
             const parsed = new URL(url);
@@ -47,6 +58,28 @@ const Dashboard = () => {
         } catch {
             return false;
         }
+    };
+
+    const isValidCustomName = (shortCode: string) => {
+        if (shortCode.length > 0) {
+            if (!/^[a-z0-9-_]{3,10}$/.test(shortCode)) {
+                setResponse({
+                    message:
+                        "Custom name must be 3-30 characters and must not have special characters except - and _",
+                    shortUrl: "",
+                });
+                return false;
+            }
+
+            if (RESERVED_WORDS.includes(shortCode)) {
+                setResponse({
+                    message: "This custom name is reserved",
+                    shortUrl: "",
+                });
+                return false;
+            }
+        }
+        return true;
     };
 
     const onShortUrl = async () => {
@@ -62,9 +95,13 @@ const Dashboard = () => {
             return;
         }
 
+        if (!isValidCustomName(customName)) {
+            return;
+        }
+
         try {
             setLoading(true);
-            const res = await api.post("/url", { originalUrl });
+            const res = await api.post("/url", { originalUrl, customName });
 
             setResponse({
                 message: res.data.message,
@@ -294,7 +331,9 @@ const Dashboard = () => {
         if (!response.message) return;
         const timer = setTimeout(() => {
             setResponse({ message: "", shortUrl: "" });
+
             setOriginalUrl("");
+            setCustomName("");
         }, 5000);
         return () => clearTimeout(timer);
     }, [response.message]);
@@ -338,7 +377,12 @@ const Dashboard = () => {
                                 placeholder="Paste your long link here..."
                             />
                             /
-                            <input type="text" placeholder="Custom name" />
+                            <input
+                                type="text"
+                                placeholder="Custom name (optional)"
+                                value={customName}
+                                onChange={(e) => setCustomName(e.target.value)}
+                            />
                         </div>
                         <button
                             className={`px-10 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${

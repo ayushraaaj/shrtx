@@ -5,11 +5,14 @@ const Header = () => {
         <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-md">
             <div className="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12">
-                        <span className="text-white font-black text-sm">S</span>
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-black text-lg">S</span>
                     </div>
-                    <span className="font-bold text-xl tracking-tight text-zinc-900">
-                        SHRTX<span className="text-blue-600">_</span>
+                    {/* <span className="font-bold text-xl tracking-tight text-zinc-900">
+                        Shrtx
+                    </span> */}
+                    <span className="text-xl font-extrabold text-zinc-900 tracking-tight">
+                        Shrtx
                     </span>
                 </Link>
 

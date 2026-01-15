@@ -22,20 +22,49 @@ const isValidUrl = (url: string) => {
 };
 
 export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
-    const { originalUrl } = req.body;
-    // console.log(originalUrl);
+    const { originalUrl, customName } = req.body;
     const userId = req.user?._id;
 
     if (!isValidUrl(originalUrl)) {
         throw new ApiError(400, "Please enter a valid url");
     }
 
-    const existingUrl = await Url.findOne({ originalUrl, owner: userId });
+    const existingUrl = await Url.exists({ originalUrl, owner: userId });
     if (existingUrl) {
         throw new ApiError(409, "URL already shortened");
     }
 
-    const shortCode = crypto.randomBytes(3).toString("hex").substring(0, 5);
+    const RESERVED_WORDS = [
+        "dashboard",
+        "analytics",
+        "group",
+        "login",
+        "signup",
+        "api",
+    ];
+
+    let shortCode: string;
+    if (customName) {
+        shortCode = customName.trim().toLowerCase();
+
+        if (!/^[a-z0-9-_]{3,10}$/.test(shortCode)) {
+            throw new ApiError(
+                400,
+                "Custom name must be 3-30 characters and must not have special characters except - and _"
+            );
+        }
+
+        if (RESERVED_WORDS.includes(shortCode)) {
+            throw new ApiError(400, "This custom name is reserved");
+        }
+
+        const existingShortCode = await Url.exists({ shortCode });
+        if (existingShortCode) {
+            throw new ApiError(409, "Custom name already in use");
+        }
+    } else {
+        shortCode = crypto.randomBytes(3).toString("hex").substring(0, 5);
+    }
 
     const REF_SOURCES = ["instagram", "facebook", "twitter", "whatsapp"];
 

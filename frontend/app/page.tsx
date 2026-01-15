@@ -2,7 +2,7 @@ import Footer from "@/components/footer/Footer";
 import Header from "@/components/header/Header";
 import Link from "next/link";
 
-export default function Home() {
+const Home = () => {
     return (
         <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col font-sans">
             <Header />
@@ -45,4 +45,6 @@ export default function Home() {
             <Footer />
         </div>
     );
-}
+};
+
+export default Home;
