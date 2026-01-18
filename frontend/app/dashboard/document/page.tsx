@@ -1,69 +1,3 @@
-// "use client";
-// import { api } from "@/lib/axios";
-// import axios from "axios";
-// import { useState } from "react";
-
-// const Document = () => {
-//     const [loading, setLoading] = useState(false);
-//     const [response, setResponse] = useState("");
-//     const [file, setFile] = useState<File | null>(null);
-
-//     const onUpload = async () => {
-//         if (!file) {
-//             setResponse("Please select a file");
-//             return;
-//         }
-
-//         try {
-//             setLoading(true);
-
-//             const formData = new FormData();
-//             formData.append("file", file);
-
-//             const res = await api.post("/document/upload", formData, {
-//                 responseType: "blob",
-//             });
-
-//             const blob = new Blob([res.data]);
-//             const url = window.URL.createObjectURL(blob);
-
-//             const a = document.createElement("a");
-//             a.href = url;
-//             a.download = `processed_${file.name}`;
-//             a.click();
-
-//             window.URL.revokeObjectURL(url);
-//         } catch (error) {
-//             if (axios.isAxiosError(error)) {
-//                 setResponse(error.response?.data.message ?? "Upload failed");
-//             } else {
-//                 setResponse("Unexpected error");
-//             }
-//         } finally {
-//             setLoading(false);
-//             setFile(null);
-//         }
-//     };
-
-//     return (
-//         <div>
-//             <h1>Document Processing</h1>
-//             <input
-//                 disabled={loading}
-//                 type="file"
-//                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-//             />
-//             <button onClick={onUpload} disabled={loading}>
-//                 {loading ? "Processing" : "Upload & Process"}{" "}
-//             </button>
-
-//             {response && <p>{response}</p>}
-//         </div>
-//     );
-// };
-
-// export default Document;
-
 "use client";
 import { api } from "@/lib/axios";
 import axios from "axios";
@@ -150,7 +84,6 @@ const Document = () => {
 
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm">
-                    {/* DROPZONE AREA */}
                     <div
                         onClick={() => fileInputRef.current?.click()}
                         className={`relative border-2 border-dashed rounded-2xl p-12 transition-all cursor-pointer flex flex-col items-center justify-center gap-4
@@ -164,7 +97,7 @@ const Document = () => {
                             type="file"
                             ref={fileInputRef}
                             className="hidden"
-                            accept=".xlsx, .xls, .csv" // Add .pdf later
+                            accept=".xlsx, .xls"
                             onChange={(e) =>
                                 setFile(e.target.files?.[0] || null)
                             }
@@ -209,7 +142,6 @@ const Document = () => {
                         )}
                     </div>
 
-                    {/* ACTION BUTTON */}
                     <button
                         onClick={onUpload}
                         disabled={loading || !file}
@@ -229,7 +161,6 @@ const Document = () => {
                         )}
                     </button>
 
-                    {/* FEEDBACK MESSAGE */}
                     {response.message && (
                         <div
                             className={`mt-6 p-4 rounded-xl border flex items-center gap-3 animate-in slide-in-from-top-2 ${
@@ -250,7 +181,6 @@ const Document = () => {
                     )}
                 </div>
 
-                {/* INFO SECTION */}
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="p-6 bg-white border border-zinc-200 rounded-2xl">
                         <h3 className="font-bold text-zinc-900 mb-2">

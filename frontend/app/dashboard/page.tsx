@@ -367,25 +367,39 @@ const Dashboard = () => {
 
                 <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">
                     <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1 flex">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <LinkIcon className="h-5 w-5 text-zinc-400" />
+                        <div className="flex-1 flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all overflow-hidden group">
+                            <div className="relative flex-1 flex items-center">
+                                <div className="pl-4 flex items-center pointer-events-none">
+                                    <LinkIcon className="h-5 w-5 text-zinc-400" />
+                                </div>
+                                <input
+                                    className="w-full bg-transparent outline-none pl-3 pr-2 py-4 text-zinc-900 placeholder:text-zinc-400"
+                                    type="text"
+                                    value={originalUrl}
+                                    onChange={(e) =>
+                                        setOriginalUrl(e.target.value)
+                                    }
+                                    placeholder="Paste your long link here..."
+                                />
                             </div>
-                            <input
-                                className="w-full bg-zinc-50 border border-zinc-200 outline-none pl-12 pr-4 py-4 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-zinc-900 placeholder:text-zinc-400"
-                                type="text"
-                                value={originalUrl}
-                                onChange={(e) => setOriginalUrl(e.target.value)}
-                                placeholder="Paste your long link here..."
-                            />
-                            /
-                            <input
-                                type="text"
-                                placeholder="Custom name (optional)"
-                                value={customName}
-                                onChange={(e) => setCustomName(e.target.value)}
-                            />
+
+                            <div className="text-zinc-300 font-light text-2xl select-none px-1">
+                                /
+                            </div>
+
+                            <div className="w-1/3 min-w-30 md:w-64 border-zinc-200/50">
+                                <input
+                                    type="text"
+                                    placeholder="Custom name (optional)"
+                                    className="w-full bg-transparent outline-none px-4 py-4 text-zinc-900 placeholder:text-zinc-400"
+                                    value={customName}
+                                    onChange={(e) =>
+                                        setCustomName(e.target.value)
+                                    }
+                                />
+                            </div>
                         </div>
+
                         <button
                             className={`px-10 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
                                 buttonDisabled || loading
