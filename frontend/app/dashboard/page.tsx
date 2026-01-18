@@ -133,7 +133,7 @@ const Dashboard = () => {
             const activeGroup = group ?? selectedGroup;
 
             const res = await api.get(
-                `/url/get-all?page=${pageNumber}&search=${searchText}&group=${activeGroup}`
+                `/url/get-all?page=${pageNumber}&search=${searchText}&group=${activeGroup}`,
             );
 
             const urlsData = res.data.data.urls;
@@ -142,7 +142,7 @@ const Dashboard = () => {
                 if (pageNumber === 1) return urlsData;
                 const existingIds = new Set(prev.map((url) => url._id));
                 const uniqueItems = urlsData.filter(
-                    (url: UrlApiItem) => !existingIds.has(url._id)
+                    (url: UrlApiItem) => !existingIds.has(url._id),
                 );
                 return [...prev, ...uniqueItems];
             });
@@ -177,8 +177,8 @@ const Dashboard = () => {
             const newStatus = res.data.data.isActive;
             setUrls((prev) =>
                 prev.map((url) =>
-                    url._id === urlId ? { ...url, isActive: newStatus } : url
-                )
+                    url._id === urlId ? { ...url, isActive: newStatus } : url,
+                ),
             );
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -193,7 +193,7 @@ const Dashboard = () => {
 
     const onDeleteUrl = async (urlId: string) => {
         const confirmDelete = confirm(
-            "Are you sure you want to delete this URL?"
+            "Are you sure you want to delete this URL?",
         );
         if (!confirmDelete) {
             return;
@@ -201,7 +201,9 @@ const Dashboard = () => {
 
         try {
             await api.delete(`/url/${urlId}/delete`);
-            setUrls((prev) => prev.filter((url) => url._id !== urlId));
+
+            // setUrls((prev) => prev.filter((url) => url._id !== urlId));
+            fetchAllUrls(page, selectedGroup);
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setResponse({
@@ -412,8 +414,8 @@ const Dashboard = () => {
                                     .includes("already")
                                     ? "bg-amber-50 border-amber-100"
                                     : response.shortUrl
-                                    ? "bg-blue-50 border-blue-100"
-                                    : "bg-red-50 border-red-100"
+                                      ? "bg-blue-50 border-blue-100"
+                                      : "bg-red-50 border-red-100"
                             }`}
                         >
                             <div className="flex items-center gap-4">

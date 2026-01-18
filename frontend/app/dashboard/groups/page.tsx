@@ -54,7 +54,7 @@ const Groups = () => {
 
     const onDeleteGroup = async (groupId: string) => {
         const confirmDelete = confirm(
-            "Are you sure you want to delete this Group?"
+            "Are you sure you want to delete this Group?",
         );
 
         if (!confirmDelete) {
@@ -65,7 +65,7 @@ const Groups = () => {
             const res = await api.delete(`/group/${groupId}/delete`);
 
             setUrlGroups((prev) =>
-                prev.filter((group) => group._id !== groupId)
+                prev.filter((group) => group._id !== groupId),
             );
         } catch (error) {}
     };
@@ -83,8 +83,8 @@ const Groups = () => {
                 prev.map((group) =>
                     group._id === editingGroupId
                         ? { ...group, groupName: newGroupName }
-                        : group
-                )
+                        : group,
+                ),
             );
 
             setEditingGroupId("");
@@ -175,7 +175,7 @@ const Groups = () => {
                                                 }
                                                 onChange={(e) =>
                                                     setNewGroupName(
-                                                        e.target.value
+                                                        e.target.value,
                                                     )
                                                 }
                                                 onKeyDown={(e) => {
@@ -220,7 +220,7 @@ const Groups = () => {
                                             onClick={() => {
                                                 setEditingGroupId(group._id);
                                                 setNewGroupName(
-                                                    group.groupName
+                                                    group.groupName,
                                                 );
                                             }}
                                         >

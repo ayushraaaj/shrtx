@@ -26,7 +26,7 @@ const Login = () => {
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setResponse(
-                    error?.response?.data.message ?? "Invalid credentials"
+                    error?.response?.data.message ?? "Invalid credentials",
                 );
             } else {
                 setResponse("Unexpected error");
@@ -91,28 +91,42 @@ const Login = () => {
                                 Forgot password?
                             </Link>
                         </div>
-                        <input
-                            className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
-                            type="password"
-                            value={user.password}
-                            onChange={(e) =>
-                                setUser({ ...user, password: e.target.value })
-                            }
-                            placeholder="••••••••"
-                        />
-                    </div>
 
-                    <button
-                        className={`w-full py-3.5 rounded-xl font-bold transition-all mt-2 ${
-                            buttonDisabled || loading
-                                ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
-                                : "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 active:scale-[0.98]"
-                        }`}
-                        onClick={onLogin}
-                        disabled={buttonDisabled || loading}
-                    >
-                        {loading ? "Signing in..." : "Login"}
-                    </button>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                if (!buttonDisabled || !loading) {
+                                    onLogin();
+                                }
+                            }}
+                        >
+                            <input
+                                className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
+                                type="password"
+                                value={user.password}
+                                onChange={(e) =>
+                                    setUser({
+                                        ...user,
+                                        password: e.target.value,
+                                    })
+                                }
+                                placeholder="••••••••"
+                            />
+
+                            <button
+                                type="submit"
+                                className={`w-full py-3.5 rounded-xl font-bold transition-all mt-6 ${
+                                    buttonDisabled || loading
+                                        ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                                        : "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 active:scale-[0.98]"
+                                }`}
+                                onClick={onLogin}
+                                disabled={buttonDisabled || loading}
+                            >
+                                {loading ? "Signing in..." : "Login"}
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 {response && (
