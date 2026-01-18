@@ -5,11 +5,29 @@ import crypto from "crypto";
 
 export const bulkShortenUrls = async (
     userId: Types.ObjectId,
-    urls: string[]
+    urls: string[],
 ) => {
     const results = [];
 
     for (const originalUrl of urls) {
+        if (originalUrl.startsWith(BACKEND_URL)) {
+            const shortCode = originalUrl.split("/").pop();
+
+            const existingShortCode = await Url.findOne({
+                shortCode,
+                owner: userId,
+            });
+
+            if (existingShortCode) {
+                results.push({
+                    originalUrl: existingShortCode.originalUrl,
+                    shortUrl: originalUrl,
+                });
+            }
+
+            continue;
+        }
+
         const existingUrl = await Url.findOne({ originalUrl, owner: userId });
 
         if (existingUrl) {

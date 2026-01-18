@@ -24,7 +24,7 @@ export const uploadDocument = asyncHandler(
         const urls = exportUrlsFromRows(rows);
         const results = await bulkShortenUrls(userId, urls);
 
-        console.log(results);
+        // console.log(results);
 
         const workbook = new ExcelJs.Workbook();
         await workbook.xlsx.readFile(req.file.path);
@@ -47,33 +47,30 @@ export const uploadDocument = asyncHandler(
             });
         });
 
-        const mappingSheet = workbook.addWorksheet("Short URL Mapping");
+        let mappingSheet = workbook.getWorksheet("Short URL Mapping");
 
-        mappingSheet.columns = [
-            { header: "Original URL", key: "originalUrl", width: 50 },
-            { header: "Short URL", key: "shortUrl", width: 30 },
-        ];
+        if (mappingSheet) {
+            mappingSheet.spliceRows(2, mappingSheet.rowCount);
+        } else {
+            mappingSheet = workbook.addWorksheet("Short URL Mapping");
+
+            mappingSheet.columns = [
+                { header: "Original URL", key: "originalUrl", width: 50 },
+                { header: "Short URL", key: "shortUrl", width: 30 },
+            ];
+        }
 
         results.forEach((url) => mappingSheet.addRow(url));
 
         res.setHeader(
             "Content-Type",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         );
 
         res.setHeader(
             "Content-Disposition",
-            `attachment; filename=${req.file.filename}`
+            `attachment; filename=${req.file.filename}`,
         );
-
-        // return res.status(201).json(
-        //     new ApiResponse("File uploaded successfully", {
-        //         originalName: req.file.originalname,
-        //         storedName: req.file.filename,
-        //         size: req.file.size,
-        //         path: req.file.path,
-        //     })
-        // );
 
         res.on("finish", () => {
             if (req.file) {
@@ -87,5 +84,5 @@ export const uploadDocument = asyncHandler(
 
         await workbook.xlsx.write(res);
         return res.end();
-    }
+    },
 );
