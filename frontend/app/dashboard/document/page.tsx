@@ -77,8 +77,7 @@ const Document = () => {
                     Document Processing
                 </h1>
                 <p className="text-zinc-500 mt-1">
-                    Upload your Excel sheets for automated processing and
-                    optimization.
+                    Upload Excel or PDF files for automated processing.
                 </p>
             </header>
 
@@ -187,9 +186,10 @@ const Document = () => {
                             How it works
                         </h3>
                         <p className="text-zinc-500 text-sm leading-relaxed">
-                            Our processor analyzes your spreadsheet, cleans the
-                            data, and applies your custom logic instantly. The
-                            processed file is returned immediately.
+                            Our document processor scans your spreadsheet,
+                            identifies valid URLs, and applies your shortening
+                            logic instantly. The updated file is returned
+                            automatically without affecting other data.
                         </p>
                     </div>
                     <div className="p-6 bg-white border border-zinc-200 rounded-2xl">
@@ -197,8 +197,9 @@ const Document = () => {
                             Coming Soon
                         </h3>
                         <p className="text-zinc-500 text-sm leading-relaxed">
-                            PDF parsing and optical character recognition (OCR)
-                            will be available in the next update.
+                            Support for PDF files, including advanced parsing
+                            and optical character recognition (OCR), will be
+                            added in an upcoming update.
                         </p>
                     </div>
                 </div>
