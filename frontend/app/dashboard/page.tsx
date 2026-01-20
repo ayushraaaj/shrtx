@@ -42,6 +42,12 @@ const Dashboard = () => {
     const [selectedUrlIds, setSelectedUrlIds] = useState<string[]>([]);
     const [isCheckedGlobal, setIsCheckedGlobal] = useState(false);
 
+    const [arrowDown, setArrowDown] = useState(true);
+
+    const dropDownGroup = () => {
+        setArrowDown((prev) => !prev);
+    };
+
     const RESERVED_WORDS = [
         "dashboard",
         "analytics",
@@ -489,6 +495,7 @@ const Dashboard = () => {
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <div className="relative">
                                 <select
+                                    onClick={dropDownGroup}
                                     className="appearance-none bg-white border border-zinc-200 pl-4 pr-10 py-2.5 rounded-xl text-sm font-bold text-zinc-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all cursor-pointer shadow-sm disabled:bg-zinc-50 disabled:text-zinc-400"
                                     disabled={isBulkAddMode || isBulkRemoveMode}
                                     value={selectedGroup}
@@ -525,7 +532,9 @@ const Dashboard = () => {
                                         + New Group
                                     </option>
                                 </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-zinc-400">
+                                <div
+                                    className={`absolute inset-y-0 right-2 flex items-center pointer-events-none text-zinc-400 transition-transform duration-75 ${!arrowDown ? "rotate-180" : "rotate-0"}`}
+                                >
                                     <svg
                                         className="w-4 h-4"
                                         fill="none"

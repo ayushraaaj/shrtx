@@ -230,7 +230,6 @@ interface Props {
     isBulkRemoveMode: boolean;
     selectedUrlIds: string[];
     onToggleSelectUrl(urlId: string): void;
-    
 }
 
 const UrlTableRow = (props: Props) => {
@@ -244,7 +243,6 @@ const UrlTableRow = (props: Props) => {
         isBulkRemoveMode,
         selectedUrlIds,
         onToggleSelectUrl,
-   
     } = props;
 
     const isExpanded = expandedUrl === url._id;
@@ -396,10 +394,13 @@ const UrlTableRow = (props: Props) => {
                                                     {ref.source}
                                                 </span>
                                                 <span className="text-[10px] truncate pr-4 text-zinc-400">
-                                                    <Link href={refUrl} target="_blank">
+                                                    <Link
+                                                        href={refUrl}
+                                                        target="_blank"
+                                                    >
                                                         {refUrl.replace(
                                                             /(^\w+:|^)\/\//,
-                                                            ""
+                                                            "",
                                                         )}
                                                     </Link>
                                                 </span>
@@ -418,7 +419,7 @@ const UrlTableRow = (props: Props) => {
                                                 <button
                                                     onClick={() =>
                                                         navigator.clipboard.writeText(
-                                                            refUrl
+                                                            refUrl,
                                                         )
                                                     }
                                                     className="px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold rounded-lg hover:bg-zinc-800 transition-all active:scale-95"

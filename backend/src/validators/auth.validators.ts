@@ -22,7 +22,7 @@ export const signupValidator = () => {
             .withMessage("Email must be in lowercase")
             .bail()
             .isEmail()
-            .withMessage("Email is invalid"),
+            .withMessage("Please enter a valid email address."),
 
         body("fullname")
             .trim()
@@ -41,7 +41,7 @@ export const signupValidator = () => {
                 min: 5,
             })
             .withMessage(
-                "Password must contain uppercase, lowercase, number, and special character"
+                "Password must contain uppercase, lowercase, number, and special character",
             ),
     ];
 };

@@ -60,46 +60,46 @@ const Login = () => {
                     </p>
                 </div>
 
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-semibold text-zinc-700 mb-1">
-                            Username or Email
-                        </label>
-                        <input
-                            className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
-                            type="text"
-                            value={user.username_email}
-                            onChange={(e) =>
-                                setUser({
-                                    ...user,
-                                    username_email: e.target.value,
-                                })
-                            }
-                            placeholder="Enter your username"
-                        />
-                    </div>
-
-                    <div>
-                        <div className="flex justify-between mb-1">
-                            <label className="text-sm font-semibold text-zinc-700">
-                                Password
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!buttonDisabled && !loading) {
+                            onLogin();
+                        }
+                    }}
+                >
+                    <div className="space-y-7">
+                        <div>
+                            <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                                Username or Email
                             </label>
-                            <Link
-                                href="#"
-                                className="text-xs text-blue-600 hover:underline"
-                            >
-                                Forgot password?
-                            </Link>
+                            <input
+                                className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
+                                type="text"
+                                value={user.username_email}
+                                onChange={(e) =>
+                                    setUser({
+                                        ...user,
+                                        username_email: e.target.value,
+                                    })
+                                }
+                                placeholder="Enter your username"
+                            />
                         </div>
 
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                if (!buttonDisabled || !loading) {
-                                    onLogin();
-                                }
-                            }}
-                        >
+                        <div>
+                            <div className="flex justify-between mb-1">
+                                <label className="text-sm font-semibold text-zinc-700">
+                                    Password
+                                </label>
+                                <Link
+                                    href="#"
+                                    className="text-xs text-blue-600 hover:underline"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
+
                             <input
                                 className="w-full border border-zinc-200 outline-none p-3 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-zinc-900"
                                 type="password"
@@ -120,14 +120,14 @@ const Login = () => {
                                         ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
                                         : "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 active:scale-[0.98]"
                                 }`}
-                                onClick={onLogin}
+                                // onClick={onLogin}
                                 disabled={buttonDisabled || loading}
                             >
                                 {loading ? "Signing in..." : "Login"}
                             </button>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                </form>
 
                 {response && (
                     <div

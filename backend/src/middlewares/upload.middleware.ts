@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueName = `${file.originalname}_${Date.now()}_${Math.round(
-            Math.random() * 1e9
+            Math.random() * 1e9,
         )}${path.extname(file.originalname)}`;
 
         cb(null, uniqueName);
@@ -18,10 +18,12 @@ const storage = multer.diskStorage({
 const file_Filter = (
     req: Express.Request,
     file: Express.Multer.File,
-    cb: multer.FileFilterCallback
+    cb: multer.FileFilterCallback,
 ) => {
     const allowedTypes = [
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel",
+        "application/pdf",
     ];
 
     if (!allowedTypes.includes(file.mimetype)) {

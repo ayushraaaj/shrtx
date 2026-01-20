@@ -134,7 +134,7 @@ const Document = () => {
                                     </p>
                                     <p className="text-zinc-400 text-sm mt-1">
                                         Supported formats: Excel (.xlsx, .xls,
-                                        .csv)
+                                        .pdf)
                                     </p>
                                 </div>
                             </>
