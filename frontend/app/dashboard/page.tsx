@@ -17,6 +17,8 @@ import {
 import ExportModal from "@/components/dashboard/ExportModal";
 import ShowCreateGroupModal from "@/components/dashboard/ShowCreateGroupModal";
 import CreateLinkModal from "@/components/dashboard/CreateLinkModal";
+import ClickLimitModal from "@/components/dashboard/ClickLimitModal";
+import ExpirationModal from "@/components/dashboard/ExpirationModal";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -72,7 +74,7 @@ const Dashboard = () => {
                 return [...prev, ...uniqueItems];
             });
 
-            if (urlsData.length < 5) setIsRemaining(false);
+            if (urlsData.length <= 5) setIsRemaining(false);
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 setResponse({
@@ -277,7 +279,7 @@ const Dashboard = () => {
     }, [isBulkAddMode, isBulkRemoveMode]);
 
     return (
-        <div className="min-h-screen bg-zinc-50 pb-20 font-sans">
+        <div className="min-h-screen bg-zinc-50 font-sans">
             <div className="max-w-8xl mx-auto px-6">
                 <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>

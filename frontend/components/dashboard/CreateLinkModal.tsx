@@ -2,6 +2,8 @@ import { api } from "@/lib/axios";
 import { LinkIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { useState } from "react";
+import ExpirationModal from "./ExpirationModal";
+import ClickLimitModal from "./ClickLimitModal";
 
 interface Group {
     groupName: string;
@@ -14,18 +16,18 @@ interface Props {
     truncate(text: string, max: number): string;
 }
 
-const CreateLinkModal = ({
-    onCloseModal,
-    onUrlCreated,
-    urlGroups,
-    truncate,
-}: Props) => {
+const CreateLinkModal = (props: Props) => {
+    const { onCloseModal, onUrlCreated, urlGroups, truncate } = props;
+
     const [originalUrl, setOriginalUrl] = useState("");
     const [customName, setCustomName] = useState("");
     const [comments, setComments] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("ungrouped");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState("");
+
+    const [showExpirationModal, setShowExpirationModal] = useState(false);
+    const [showClickLimitModal, setShowClickLimitModal] = useState(false);
 
     const RESERVED_WORDS = [
         "dashboard",
@@ -45,189 +47,220 @@ const CreateLinkModal = ({
         }
     };
 
-    const onShortUrl = async () => {
-        setError(null);
+    const isValidCustomName = (shortCode: string) => {
+        if (shortCode.length > 0) {
+            if (!/^[a-z0-9-_]{3,10}$/.test(shortCode)) {
+                setError(
+                    "Custom name must be 3-10 characters (letters, numbers, -, _)",
+                );
+                return false;
+            }
 
+            if (RESERVED_WORDS.includes(shortCode)) {
+                setError("This custom name is reserved.");
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const onShortUrl = async () => {
         if (!isValidUrl(originalUrl)) {
             setError("Please enter a valid URL (include http:// or https://)");
             return;
         }
 
-        if (customName && !/^[a-z0-9-_]{3,10}$/.test(customName)) {
-            setError(
-                "Custom name must be 3-10 characters (letters, numbers, -, _)",
-            );
-            return;
-        }
-
-        if (RESERVED_WORDS.includes(customName)) {
-            setError("This custom name is reserved.");
+        if (!isValidCustomName(customName)) {
             return;
         }
 
         try {
             setLoading(true);
-            await api.post("/url", {
+            const res = await api.post("/url", {
                 originalUrl,
                 customName,
-                group: selectedGroup,
-                comments,
             });
+
             onUrlCreated();
             onCloseModal();
-        } catch (err) {
-            if (axios.isAxiosError(err)) {
-                setError(err.response?.data.message);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data.message);
             } else {
                 setError("Failed to create link. Please try again.");
             }
-            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={onCloseModal}
-        >
+        <>
             <div
-                className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-xl w-full max-w-2xl overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                onClick={onCloseModal}
             >
-                <h2 className="text-xl font-bold mb-6">Create New Link</h2>
+                <div
+                    className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-xl w-full max-w-2xl overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <h2 className="text-xl font-bold mb-6">Create New Link</h2>
 
-                <section className="space-y-6">
-                    <div className="flex flex-col gap-2">
-                        <label
-                            htmlFor="originalUrl"
-                            className="text-sm font-medium text-zinc-700"
-                        >
-                            Destination URL
-                        </label>
-                        <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all overflow-hidden px-4 py-4">
-                            <LinkIcon className="h-5 w-5 text-zinc-400" />
-                            <input
-                                id="originalUrl"
-                                className="w-full bg-transparent outline-none pl-3 text-zinc-900 placeholder:text-zinc-400"
-                                type="text"
-                                value={originalUrl}
-                                onChange={(e) => setOriginalUrl(e.target.value)}
-                                placeholder="https://example.com/very-long-link-to-shorten"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                        <label
-                            htmlFor="customName"
-                            className="text-sm font-medium text-zinc-700"
-                        >
-                            Custom Name (Optional)
-                        </label>
-                        <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all overflow-hidden px-4 py-4">
-                            <input
-                                id="customName"
-                                type="text"
-                                placeholder="e.g. summer-sale"
-                                className="w-full bg-transparent outline-none text-zinc-900 placeholder:text-zinc-400"
-                                value={customName}
-                                onChange={(e) => setCustomName(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-zinc-700">
-                                Group
-                            </label>
-                            <select
-                                value={selectedGroup}
-                                onChange={(e) =>
-                                    setSelectedGroup(e.target.value)
-                                }
-                                className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500"
-                            >
-                                <option value="ungrouped">Ungrouped</option>
-                                <optgroup label="My Groups">
-                                    {urlGroups.map((group) => (
-                                        <option
-                                            key={group.groupName}
-                                            value={group.groupName}
-                                        >
-                                            {truncate(group.groupName, 20)}
-                                        </option>
-                                    ))}
-                                </optgroup>
-                                <option
-                                    value="createGroup"
-                                    className="text-blue-600 font-bold"
-                                >
-                                    + New Group
-                                </option>
-                            </select>
-                        </div>
+                    <section className="space-y-6">
                         <div className="flex flex-col gap-2">
                             <label
-                                htmlFor="comments"
+                                htmlFor="originalUrl"
                                 className="text-sm font-medium text-zinc-700"
                             >
-                                Comments
+                                Destination URL
                             </label>
-                            <textarea
-                                id="comments"
-                                value={comments}
-                                onChange={(e) => setComments(e.target.value)}
-                                className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500 resize-none h-[50px]"
-                                placeholder="Optional notes..."
-                            />
+                            <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all overflow-hidden px-4 py-4">
+                                <LinkIcon className="h-5 w-5 text-zinc-400" />
+                                <input
+                                    id="originalUrl"
+                                    className="w-full bg-transparent outline-none pl-3 text-zinc-900 placeholder:text-zinc-400"
+                                    type="text"
+                                    value={originalUrl}
+                                    onChange={(e) =>
+                                        setOriginalUrl(e.target.value)
+                                    }
+                                    placeholder="https://example.com/very-long-link-to-shorten"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    {error && (
-                        <p className="text-red-500 text-sm font-medium">
-                            {error}
-                        </p>
-                    )}
-                </section>
+                        <div className="flex flex-col gap-2">
+                            <label
+                                htmlFor="customName"
+                                className="text-sm font-medium text-zinc-700"
+                            >
+                                Custom Name (Optional)
+                            </label>
+                            <div className="flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all overflow-hidden px-4 py-4">
+                                <input
+                                    id="customName"
+                                    type="text"
+                                    placeholder="e.g. summer-sale"
+                                    className="w-full bg-transparent outline-none text-zinc-900 placeholder:text-zinc-400"
+                                    value={customName}
+                                    onChange={(e) =>
+                                        setCustomName(e.target.value)
+                                    }
+                                />
+                            </div>
+                        </div>
 
-                <footer className="mt-8 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex gap-2">
-                        <button className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
-                            Password
-                        </button>
-                        <button className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
-                            Expiration
-                        </button>
-                        <button className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
-                            Limit Clicks
-                        </button>
-                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-zinc-700">
+                                    Group
+                                </label>
+                                <select
+                                    value={selectedGroup}
+                                    onChange={(e) =>
+                                        setSelectedGroup(e.target.value)
+                                    }
+                                    className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500"
+                                >
+                                    <option value="ungrouped">Ungrouped</option>
+                                    <optgroup label="My Groups">
+                                        {urlGroups.map((group) => (
+                                            <option
+                                                key={group.groupName}
+                                                value={group.groupName}
+                                            >
+                                                {truncate(group.groupName, 20)}
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                    <option
+                                        value="createGroup"
+                                        className="text-blue-600 font-bold"
+                                    >
+                                        + New Group
+                                    </option>
+                                </select>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label
+                                    htmlFor="comments"
+                                    className="text-sm font-medium text-zinc-700"
+                                >
+                                    Comments
+                                </label>
+                                <textarea
+                                    id="comments"
+                                    value={comments}
+                                    onChange={(e) =>
+                                        setComments(e.target.value)
+                                    }
+                                    className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500 resize-none h-[50px]"
+                                    placeholder="Optional notes..."
+                                />
+                            </div>
+                        </div>
 
-                    <div className="flex gap-3 w-full sm:w-auto">
-                        <button
-                            onClick={onCloseModal}
-                            className="flex-1 sm:flex-none px-6 py-2.5 font-medium text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={onShortUrl}
-                            disabled={loading || !originalUrl}
-                            className={`flex-1 sm:flex-none px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg ${
-                                loading || !originalUrl
-                                    ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
-                                    : "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20 active:scale-95"
-                            }`}
-                        >
-                            {loading ? "Creating..." : "Create Link"}
-                        </button>
-                    </div>
-                </footer>
+                        {error && (
+                            <p className="text-red-500 text-sm font-medium">
+                                {error}
+                            </p>
+                        )}
+                    </section>
+
+                    <footer className="mt-8 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex gap-2">
+                            <button className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
+                                Password
+                            </button>
+                            <button
+                                onClick={() => setShowExpirationModal(true)}
+                                className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+                            >
+                                Expiration
+                            </button>
+                            <button
+                                onClick={() => setShowClickLimitModal(true)}
+                                className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+                            >
+                                Click Limit
+                            </button>
+                        </div>
+
+                        <div className="flex gap-3 w-full sm:w-auto">
+                            <button
+                                onClick={onCloseModal}
+                                className="flex-1 sm:flex-none px-6 py-2.5 font-medium text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onShortUrl}
+                                disabled={loading || !originalUrl}
+                                className={`flex-1 sm:flex-none px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg ${
+                                    loading || !originalUrl
+                                        ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                                        : "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20 active:scale-95"
+                                }`}
+                            >
+                                {loading ? "Creating..." : "Create Link"}
+                            </button>
+                        </div>
+                    </footer>
+                </div>
             </div>
-        </div>
+            {showExpirationModal && (
+                <ExpirationModal
+                    closeClickExpirationModal={() =>
+                        setShowExpirationModal(false)
+                    }
+                />
+            )}
+            {showClickLimitModal && (
+                <ClickLimitModal
+                    closeClickLimitModal={() => setShowClickLimitModal(false)}
+                />
+            )}
+        </>
     );
 };
 
