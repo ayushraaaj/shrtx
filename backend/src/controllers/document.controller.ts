@@ -7,6 +7,10 @@ import { exportUrlsFromRows } from "../utils/extractUrlsFromRows";
 import { bulkShortenUrls } from "../services/bulkShorten.service";
 import ExcelJs from "exceljs";
 import fs from "fs";
+import { loadPDF } from "../utils/loadPdf";
+import { extractPageText } from "../services/pdfTextExtractor.service";
+import { extractUrlsFromPage } from "../services/pdfUrlExtractor";
+import { addLinkAnnotation } from "../services/pdfAnnotation.service";
 
 export const uploadDocument = asyncHandler(
     async (req: Request, res: Response) => {
@@ -27,7 +31,15 @@ export const uploadDocument = asyncHandler(
         } = req.file;
 
         if (mimetype === "application/pdf") {
-            await processPdfDocument({ filePath, userId, res, originalName });
+            const modifiedPdfBytes: any = await addLinkAnnotation(filePath);
+            fs.writeFileSync("test-output.pdf", modifiedPdfBytes);
+
+            // const pagesText = await extractPageText(filePath);
+            // console.log("hello");
+            // for (const pageText of pagesText) {
+            //     const urls = extractUrlsFromPage(pageText);
+            //     console.log("Extracted URLs:", urls);
+            // }
         } else if (
             mimetype ===
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||

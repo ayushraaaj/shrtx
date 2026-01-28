@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import ExportModal from "@/components/dashboard/ExportModal";
 import ShowCreateGroupModal from "@/components/dashboard/ShowCreateGroupModal";
+import CreateLinkModal from "@/components/dashboard/CreateLinkModal";
 
 const Dashboard = () => {
     const [originalUrl, setOriginalUrl] = useState("");
@@ -29,6 +30,8 @@ const Dashboard = () => {
     const [isRemaining, setIsRemaining] = useState(true);
     const [searchText, setSearchText] = useState("");
     const [showExportModal, setShowExportModal] = useState(false);
+
+    const [showCreateLinkModal, setShowCreateLinkModal] = useState(false);
 
     const [urlGroups, setUrlGroups] = useState([]);
     const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
@@ -46,90 +49,6 @@ const Dashboard = () => {
 
     const dropDownGroup = () => {
         setArrowDown((prev) => !prev);
-    };
-
-    const RESERVED_WORDS = [
-        "dashboard",
-        "analytics",
-        "group",
-        "login",
-        "signup",
-        "api",
-    ];
-
-    const isValidUrl = (url: string) => {
-        try {
-            const parsed = new URL(url);
-            return parsed.protocol === "http:" || parsed.protocol === "https:";
-        } catch {
-            return false;
-        }
-    };
-
-    const isValidCustomName = (shortCode: string) => {
-        if (shortCode.length > 0) {
-            if (!/^[a-z0-9-_]{3,10}$/.test(shortCode)) {
-                setResponse({
-                    message:
-                        "Custom name must be 3-30 characters and must not have special characters except - and _",
-                    shortUrl: "",
-                });
-                return false;
-            }
-
-            if (RESERVED_WORDS.includes(shortCode)) {
-                setResponse({
-                    message: "This custom name is reserved",
-                    shortUrl: "",
-                });
-                return false;
-            }
-        }
-        return true;
-    };
-
-    const onShortUrl = async () => {
-        if (isBulkAddMode || isBulkRemoveMode) {
-            return;
-        }
-
-        if (!isValidUrl(originalUrl)) {
-            setResponse({
-                message: "Please enter a valid URL (include http/https)",
-                shortUrl: "",
-            });
-            return;
-        }
-
-        if (!isValidCustomName(customName)) {
-            return;
-        }
-
-        try {
-            setLoading(true);
-            const res = await api.post("/url", { originalUrl, customName });
-
-            setResponse({
-                message: res.data.message,
-                shortUrl: res.data.data,
-            });
-
-            setIsRemaining(true);
-            setPage(1);
-            fetchAllUrls(1);
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                setResponse({
-                    message:
-                        error.response?.data.message ?? "Something went wrong",
-                    shortUrl: "",
-                });
-            } else {
-                setResponse({ message: "Unexpected error", shortUrl: "" });
-            }
-        } finally {
-            setLoading(false);
-        }
     };
 
     const fetchAllUrls = async (pageNumber: number, group?: string) => {
@@ -369,9 +288,18 @@ const Dashboard = () => {
                             Manage and track your shortened links performance.
                         </p>
                     </div>
+
+                    <button
+                        className={`flex items-center gap-2 px-5 py-4 bg-white border border-blue-100 text-blue-600 rounded-xl text-xs font-bold transition-all duration-200 hover:bg-blue-50 hover:border-blue-200 active:scale-95 disabled:opacity-70 shadow-sm shadow-blue-500/5`}
+                        onClick={() => setShowCreateLinkModal(true)}
+                    >
+                        <>
+                            <PlusIcon className="w-5 h-5" /> Create Link
+                        </>
+                    </button>
                 </header>
 
-                <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">
+                {/* <section className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm mb-12">
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all overflow-hidden group">
                             <div className="relative flex-1 flex items-center">
@@ -484,7 +412,7 @@ const Dashboard = () => {
                             )}
                         </div>
                     )}
-                </section>
+                </section> */}
 
                 <section className="bg-white border border-zinc-200 rounded-3xl shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50/30">
@@ -533,7 +461,7 @@ const Dashboard = () => {
                                     </option>
                                 </select>
                                 <div
-                                    className={`absolute inset-y-0 right-2 flex items-center pointer-events-none text-zinc-400 transition-transform duration-75 ${!arrowDown ? "rotate-180" : "rotate-0"}`}
+                                    className={`absolute inset-y-0 right-2 flex items-center pointer-events-none text-zinc-400 transition-transform duration-75 ${arrowDown ? "rotate-0" : "rotate-180"}`}
                                 >
                                     <svg
                                         className="w-4 h-4"
@@ -624,7 +552,7 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    <div className="min-h-75">
+                    <div className="min-h-35">
                         <UrlTable
                             urls={urls}
                             onToggleStatus={onToggleStatus}
@@ -681,6 +609,18 @@ const Dashboard = () => {
                 <ShowCreateGroupModal
                     onCloseGroupModal={() => setShowCreateGroupModal(false)}
                     fetchAllGroups={fetchAllGroups}
+                />
+            )}
+            {showCreateLinkModal && (
+                <CreateLinkModal
+                    onCloseModal={() => setShowCreateLinkModal(false)}
+                    onUrlCreated={() => {
+                        setIsRemaining(true);
+                        setPage(1);
+                        fetchAllUrls(1);
+                    }}
+                    urlGroups={urlGroups}
+                    truncate={truncate}
                 />
             )}
         </div>

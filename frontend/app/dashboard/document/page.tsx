@@ -96,7 +96,7 @@ const Document = () => {
                             type="file"
                             ref={fileInputRef}
                             className="hidden"
-                            accept=".xlsx, .xls"
+                            accept=".xlsx, .xls, .pdf"
                             onChange={(e) =>
                                 setFile(e.target.files?.[0] || null)
                             }
