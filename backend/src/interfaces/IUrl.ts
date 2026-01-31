@@ -16,14 +16,14 @@ export interface IUrl extends Document {
     isActive: boolean;
     createdAt: string;
     refs: IUrlRef[];
-    groupId: Types.ObjectId;
+    groupId: Types.ObjectId | null;
 }
 
 export interface UrlQuery {
     owner: Types.ObjectId;
     $or?: [
         { originalUrl: { $regex: string; $options: string } },
-        { shortCode: { $regex: string; $options: string } }
+        { shortCode: { $regex: string; $options: string } },
     ];
     groupId?: Types.ObjectId | null;
 }

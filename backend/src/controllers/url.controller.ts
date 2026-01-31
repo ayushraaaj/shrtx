@@ -22,7 +22,16 @@ const isValidUrl = (url: string) => {
 };
 
 export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
-    const { originalUrl, customName } = req.body;
+    const {
+        originalUrl,
+        customName,
+        expiration,
+        limit,
+        notes,
+        password,
+        selectedGroup,
+    } = req.body;
+
     const userId = req.user?._id;
 
     if (!isValidUrl(originalUrl)) {
@@ -50,7 +59,7 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
         if (!/^[a-z0-9-_]{3,10}$/.test(shortCode)) {
             throw new ApiError(
                 400,
-                "Custom name must be 3-30 characters and must not have special characters except - and _"
+                "Custom name must be 3-30 characters and must not have special characters except - and _",
             );
         }
 
@@ -74,11 +83,24 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
         createdAt: new Date(),
     }));
 
+    let groupId = null;
+    if (selectedGroup !== "ungrouped") {
+        const group = await Group.findOne({
+            groupName: selectedGroup,
+            owner: userId,
+        });
+
+        if (group) {
+            groupId = group._id;
+        }
+    }
+
     const response = await Url.create({
         shortCode: shortCode,
         originalUrl: originalUrl,
         owner: userId,
         refs,
+        groupId,
     });
 
     const shortenedUrl = `${BACKEND_URL}/${shortCode}`;
@@ -110,7 +132,7 @@ export const openShortUrl = asyncHandler(
         urlDoc.save({ validateBeforeSave: false });
 
         return res.redirect(urlDoc.originalUrl);
-    }
+    },
 );
 
 export const generateQR = asyncHandler(async (req: Request, res: Response) => {
@@ -200,7 +222,7 @@ export const getAllUrlDetails = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("URLs fetched successfully", urlsData));
-    }
+    },
 );
 
 export const toggleUrlStatus = asyncHandler(
@@ -220,12 +242,12 @@ export const toggleUrlStatus = asyncHandler(
         urlDoc.isActive = !urlDoc.isActive;
         urlDoc.save({ validateBeforeSave: false });
 
-        return res
-            .status(200)
-            .json(
-                new ApiResponse("Status updated", { isActive: urlDoc.isActive })
-            );
-    }
+        return res.status(200).json(
+            new ApiResponse("Status updated", {
+                isActive: urlDoc.isActive,
+            }),
+        );
+    },
 );
 
 export const deleteUrl = asyncHandler(async (req: Request, res: Response) => {
@@ -274,7 +296,7 @@ export const exportUrls = asyncHandler(async (req: Request, res: Response) => {
         res.setHeader("Content-Type", "text/csv");
         res.setHeader(
             "Content-Disposition",
-            "attachment; filename=urls-export.csv"
+            "attachment; filename=urls-export.csv",
         );
 
         return res.status(200).send(csv);
@@ -342,11 +364,11 @@ export const exportUrls = asyncHandler(async (req: Request, res: Response) => {
 
         res.setHeader(
             "Content-Type",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         );
         res.setHeader(
             "Content-Disposition",
-            "attachment; filename=urls-export.xlsx"
+            "attachment; filename=urls-export.xlsx",
         );
 
         await workbook.xlsx.write(res);
@@ -398,7 +420,7 @@ export const getUrlAnalytics = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("Fetching successfull", response));
-    }
+    },
 );
 
 export const exportUrlAnalytics = asyncHandler(
@@ -418,7 +440,7 @@ export const exportUrlAnalytics = asyncHandler(
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
-            `attachment; filename=url-analytics-${analytics.shortCode}.pdf`
+            `attachment; filename=url-analytics-${analytics.shortCode}.pdf`,
         );
 
         doc.pipe(res);
@@ -441,7 +463,7 @@ export const exportUrlAnalytics = asyncHandler(
 
         const barChartImage = charts.bar.replace(
             /^data:image\/png;base64,/,
-            ""
+            "",
         );
         doc.image(Buffer.from(barChartImage, "base64"), {
             fit: [500, 250],
@@ -455,7 +477,7 @@ export const exportUrlAnalytics = asyncHandler(
 
         const pieChartImage = charts.pie.replace(
             /^data:image\/png;base64,/,
-            ""
+            "",
         );
         doc.image(Buffer.from(pieChartImage, "base64"), {
             fit: [400, 250],
@@ -467,12 +489,12 @@ export const exportUrlAnalytics = asyncHandler(
         doc.fontSize(10).text(`Generated on ${new Date()}`, { align: "right" });
 
         doc.end();
-    }
+    },
 );
 
 export const getAllUrlAnalyticsData = async (
     userId: Types.ObjectId,
-    groupId?: Types.ObjectId
+    groupId?: Types.ObjectId,
 ) => {
     const query: UrlQuery = {
         owner: userId,
@@ -507,7 +529,7 @@ export const getAllUrlAnalyticsData = async (
 
     const totalRefsClicks = Object.values(refsMap).reduce(
         (sum, clicks) => sum + clicks,
-        0
+        0,
     );
 
     const directClicks = totalClicks - totalRefsClicks;
@@ -544,10 +566,10 @@ export const getAllUrlAnalytics = asyncHandler(
             .json(
                 new ApiResponse(
                     "Overview analytics fetched successfully",
-                    response
-                )
+                    response,
+                ),
             );
-    }
+    },
 );
 
 export const exportAllUrlsAnalytics = asyncHandler(
@@ -566,7 +588,7 @@ export const exportAllUrlsAnalytics = asyncHandler(
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
-            `attachment; filename=${heading}_${groupName}.pdf`
+            `attachment; filename=${heading}_${groupName}.pdf`,
         );
 
         doc.pipe(res);
@@ -595,7 +617,7 @@ export const exportAllUrlsAnalytics = asyncHandler(
 
         const barChartImage = charts.bar.replace(
             /^data:image\/png;base64,/,
-            ""
+            "",
         );
         doc.image(Buffer.from(barChartImage, "base64"), {
             fit: [500, 250],
@@ -609,7 +631,7 @@ export const exportAllUrlsAnalytics = asyncHandler(
 
         const pieChartImage = charts.pie.replace(
             /^data:image\/png;base64,/,
-            ""
+            "",
         );
         doc.image(Buffer.from(pieChartImage, "base64"), {
             fit: [400, 250],
@@ -621,5 +643,5 @@ export const exportAllUrlsAnalytics = asyncHandler(
         doc.fontSize(10).text(`Generated on ${new Date()}`, { align: "right" });
 
         doc.end();
-    }
+    },
 );

@@ -4,6 +4,7 @@ import axios from "axios";
 import { useState } from "react";
 import ExpirationModal from "./ExpirationModal";
 import ClickLimitModal from "./ClickLimitModal";
+import UrlPasswordModal from "./UrlPasswordModal";
 
 interface Group {
     groupName: string;
@@ -14,20 +15,32 @@ interface Props {
     onUrlCreated(): void;
     urlGroups: Group[];
     truncate(text: string, max: number): string;
+    openCreateGroupModal(): void;
 }
 
 const CreateLinkModal = (props: Props) => {
-    const { onCloseModal, onUrlCreated, urlGroups, truncate } = props;
+    const {
+        onCloseModal,
+        onUrlCreated,
+        urlGroups,
+        truncate,
+        openCreateGroupModal,
+    } = props;
 
     const [originalUrl, setOriginalUrl] = useState("");
     const [customName, setCustomName] = useState("");
-    const [comments, setComments] = useState("");
+    const [notes, setNotes] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("ungrouped");
+    const [password, setPassword] = useState("");
+    const [limit, setLimit] = useState(0);
+    const [expiration, setExpiration] = useState<Date | null>(null);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const [showExpirationModal, setShowExpirationModal] = useState(false);
     const [showClickLimitModal, setShowClickLimitModal] = useState(false);
+    const [showUrlPasswordModal, setShowUrlPasswordModal] = useState(false);
 
     const RESERVED_WORDS = [
         "dashboard",
@@ -74,11 +87,21 @@ const CreateLinkModal = (props: Props) => {
             return;
         }
 
+        if (expiration && expiration <= new Date()) {
+            setError("Expiration time has already passed. Please update it.");
+            return;
+        }
+
         try {
             setLoading(true);
             const res = await api.post("/url", {
                 originalUrl,
                 customName,
+                selectedGroup,
+                notes,
+                password,
+                limit,
+                expiration,
             });
 
             onUrlCreated();
@@ -157,9 +180,14 @@ const CreateLinkModal = (props: Props) => {
                                 </label>
                                 <select
                                     value={selectedGroup}
-                                    onChange={(e) =>
-                                        setSelectedGroup(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value === "createGroup") {
+                                            openCreateGroupModal();
+                                            return;
+                                        }
+                                        setSelectedGroup(value);
+                                    }}
                                     className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500"
                                 >
                                     <option value="ungrouped">Ungrouped</option>
@@ -183,17 +211,15 @@ const CreateLinkModal = (props: Props) => {
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label
-                                    htmlFor="comments"
+                                    htmlFor="notes"
                                     className="text-sm font-medium text-zinc-700"
                                 >
-                                    Comments
+                                    Notes
                                 </label>
                                 <textarea
-                                    id="comments"
-                                    value={comments}
-                                    onChange={(e) =>
-                                        setComments(e.target.value)
-                                    }
+                                    id="notes"
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
                                     className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500 resize-none h-[50px]"
                                     placeholder="Optional notes..."
                                 />
@@ -209,7 +235,10 @@ const CreateLinkModal = (props: Props) => {
 
                     <footer className="mt-8 pt-6 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="flex gap-2">
-                            <button className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
+                            <button
+                                onClick={() => setShowUrlPasswordModal(true)}
+                                className="px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+                            >
                                 Password
                             </button>
                             <button
@@ -253,11 +282,19 @@ const CreateLinkModal = (props: Props) => {
                     closeClickExpirationModal={() =>
                         setShowExpirationModal(false)
                     }
+                    onSetExpiration={(exp) => setExpiration(exp)}
                 />
             )}
             {showClickLimitModal && (
                 <ClickLimitModal
                     closeClickLimitModal={() => setShowClickLimitModal(false)}
+                    onSetLimit={(lmt) => setLimit(lmt)}
+                />
+            )}
+            {showUrlPasswordModal && (
+                <UrlPasswordModal
+                    closeUrlPasswordModal={() => setShowUrlPasswordModal(false)}
+                    onSetPassword={(pwd) => setPassword(pwd)}
                 />
             )}
         </>

@@ -40,7 +40,7 @@ const Dashboard = () => {
     const [selectedGroup, setSelectedGroup] = useState("all");
     const [addUrlDone, setAddUrlDone] = useState("Add URLs");
     const [removeUrlDone, setRemoveUrlDone] = useState("Remove URLs");
-    // const [createGroup, setCreateGroup] = useState("");
+
     const [isBulkAddMode, setIsBulkAddMode] = useState(false);
     const [isBulkRemoveMode, setIsBulkRemoveMode] = useState(false);
 
@@ -623,6 +623,7 @@ const Dashboard = () => {
                     }}
                     urlGroups={urlGroups}
                     truncate={truncate}
+                    openCreateGroupModal={() => setShowCreateGroupModal(true)}
                 />
             )}
         </div>

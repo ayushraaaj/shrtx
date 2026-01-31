@@ -15,7 +15,7 @@ const ShowCreateGroupModal = (props: Props) => {
 
     const onAddingGroup = async () => {
         try {
-            if (!groupName || groupName.length === 0) {
+            if (!groupName.trim() || groupName.trim().length === 0) {
                 setError("Please enter a name");
                 return;
             }
@@ -27,7 +27,7 @@ const ShowCreateGroupModal = (props: Props) => {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setError(
-                    error.response?.data.message ?? "Something went wrong"
+                    error.response?.data.message ?? "Something went wrong",
                 );
             } else {
                 setError("Unexpected error");
@@ -36,7 +36,7 @@ const ShowCreateGroupModal = (props: Props) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-100">
             <div className="bg-white w-96 rounded-xl p-6 shadow-lg">
                 <h2 className="text-lg font-bold mb-4">Group Name</h2>
 

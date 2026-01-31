@@ -2,13 +2,25 @@ import { useState } from "react";
 
 interface Props {
     closeClickLimitModal(): void;
+    onSetLimit(limit: number): void;
 }
 
 const ClickLimitModal = (props: Props) => {
-    const { closeClickLimitModal } = props;
+    const { closeClickLimitModal, onSetLimit } = props;
 
     const [limit, setLimit] = useState(0);
     const [error, setError] = useState("");
+
+    const onDone = () => {
+        if (limit <= 0) {
+            setError("Limit must be greater than 0");
+            return;
+        } else {
+            onSetLimit(limit);
+        }
+
+        closeClickLimitModal();
+    };
 
     return (
         <div
@@ -19,7 +31,7 @@ const ClickLimitModal = (props: Props) => {
                 className="bg-white w-96 rounded-xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-lg font-bold mb-4">Group Name</h2>
+                <h2 className="text-lg font-bold mb-4">Click Limit</h2>
 
                 <div className="mb-4">
                     <input
@@ -48,7 +60,7 @@ const ClickLimitModal = (props: Props) => {
                     </button>
 
                     <button
-                        // onClick={onAddingGroup}
+                        onClick={onDone}
                         className="px-4 py-2 bg-blue-600 text-white rounded"
                     >
                         Done

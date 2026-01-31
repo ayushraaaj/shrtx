@@ -1,57 +1,45 @@
 import { useState } from "react";
 
 interface Props {
-    closeClickExpirationModal(): void;
-    onSetExpiration(exp: Date): void;
+    closeUrlPasswordModal(): void;
+    onSetPassword(password: string): void;
 }
 
-const ExpirationModal = (props: Props) => {
-    const { closeClickExpirationModal, onSetExpiration } = props;
+const UrlPasswordModal = (props: Props) => {
+    const { closeUrlPasswordModal, onSetPassword } = props;
 
-    const [expiration, setExpiration] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const getMinDateTime = () => {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() + 1);
-        return now.toISOString().slice(0, 16);
-    };
-
     const onDone = () => {
-        if (!expiration) {
-            setError("Select a valid data & time");
+        const pwd = password.trim();
+        if (!pwd) {
+            setError("Please enter password");
             return;
+        } else {
+            onSetPassword(pwd);
         }
 
-        const selected = new Date(expiration);
-        const now = new Date();
-
-        if (selected <= now) {
-            setError("Expiration must be a future date and time");
-            return;
-        }
-
-        onSetExpiration(selected);
-        closeClickExpirationModal();
+        closeUrlPasswordModal();
     };
 
     return (
         <div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-51 p-4"
-            onClick={closeClickExpirationModal}
+            onClick={closeUrlPasswordModal}
         >
             <div
                 className="bg-white w-96 rounded-xl p-6 shadow-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-lg font-bold mb-4">Link Expiration</h2>
+                <h2 className="text-lg font-bold mb-4">Link Password</h2>
 
                 <div className="mb-4">
                     <input
-                        type="datetime-local"
-                        min={getMinDateTime()}
-                        value={expiration}
-                        onChange={(e) => setExpiration(e.target.value)}
+                        type="password"
+                        placeholder="Enter password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className={`w-full border rounded p-2 ${
                             error ? "border-red-500 bg-red-50" : ""
                         }`}
@@ -66,7 +54,7 @@ const ExpirationModal = (props: Props) => {
 
                 <div className="flex justify-end gap-3">
                     <button
-                        onClick={closeClickExpirationModal}
+                        onClick={closeUrlPasswordModal}
                         className="px-4 py-2 border rounded"
                     >
                         Cancel
@@ -84,4 +72,4 @@ const ExpirationModal = (props: Props) => {
     );
 };
 
-export default ExpirationModal;
+export default UrlPasswordModal;
