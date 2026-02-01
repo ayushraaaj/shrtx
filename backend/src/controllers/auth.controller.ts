@@ -56,12 +56,12 @@ export const signupUser = asyncHandler(async (req: Request, res: Response) => {
         subject: "Please verify your email",
         mailgenContent: emailVerificationMailgenContent(
             user.fullname,
-            `${CLIENT_URL}/verifyemail/${hashedToken}`
+            `${CLIENT_URL}/verifyemail/${hashedToken}`,
         ),
     });
 
     const createdUser = await User.findById(user._id).select(
-        "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry -refreshToken"
+        "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry -refreshToken",
     );
 
     if (!createdUser) {
@@ -89,12 +89,11 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(401, "Invalid credentials");
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
-        user
-    );
+    const { accessToken, refreshToken } =
+        await generateAccessAndRefreshToken(user);
 
     const loggedInUser = await User.findById(user._id).select(
-        "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry"
+        "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry",
     );
 
     const options = {
@@ -111,7 +110,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
                 loggedInUser,
                 accessToken,
                 refreshToken,
-            })
+            }),
         );
 });
 
@@ -136,7 +135,7 @@ export const verifyUserEmail = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("Email successfully verified", {}));
-    }
+    },
 );
 
 export const logoutUser = asyncHandler(async (req: Request, res: Response) => {

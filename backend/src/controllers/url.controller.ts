@@ -11,6 +11,7 @@ import QRCode from "qrcode";
 import { Types } from "mongoose";
 import PDFDocument from "pdfkit";
 import { Group } from "../models/group.model";
+import { handleRedirect } from "../services/handleRedirect";
 
 const isValidUrl = (url: string) => {
     try {
@@ -53,6 +54,7 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
     ];
 
     let shortCode: string;
+
     if (customName) {
         shortCode = customName.trim().toLowerCase();
 
@@ -101,6 +103,10 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
         owner: userId,
         refs,
         groupId,
+        expiration,
+        limit: limit <= 0 ? null : limit,
+        notes: notes.trim() ? notes.trim() : null,
+        password,
     });
 
     const shortenedUrl = `${BACKEND_URL}/${shortCode}`;
@@ -113,23 +119,27 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
 export const openShortUrl = asyncHandler(
     async (req: Request, res: Response) => {
         const { shortCode } = req.params;
-        const { ref } = req.query;
 
         const urlDoc = await Url.findOne({ shortCode });
-        if (!urlDoc || !urlDoc.isActive) {
+
+        const now = new Date();
+
+        if (
+            !urlDoc ||
+            !urlDoc.isActive ||
+            urlDoc.limit === 0 ||
+            (urlDoc.expiration !== null && urlDoc.expiration < now)
+        ) {
             return res.redirect(`${CLIENT_URL}/404`);
         }
 
-        urlDoc.clicks += 1;
-
-        if (ref) {
-            const findRef = urlDoc.refs.find((r) => r.source === ref);
-
-            if (findRef) {
-                findRef.clicks += 1;
-            }
+        if (urlDoc.password && urlDoc.password !== null) {
+            return res.redirect(
+                `${CLIENT_URL}/url/verify-password?shortCode=${shortCode}`,
+            );
         }
-        urlDoc.save({ validateBeforeSave: false });
+
+        await handleRedirect(req, res, urlDoc);
 
         return res.redirect(urlDoc.originalUrl);
     },
@@ -643,5 +653,35 @@ export const exportAllUrlsAnalytics = asyncHandler(
         doc.fontSize(10).text(`Generated on ${new Date()}`, { align: "right" });
 
         doc.end();
+    },
+);
+
+export const verifyUrlPassword = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { shortCode, password } = req.body;
+
+        const urlDoc = await Url.findOne({ shortCode });
+
+        const now = new Date();
+
+        if (
+            !urlDoc ||
+            !urlDoc.isActive ||
+            urlDoc.limit === 0 ||
+            (urlDoc.expiration !== null && urlDoc.expiration < now)
+        ) {
+            throw new ApiError(401, "Invalid or expired link");
+        }
+
+        const isPasswordCorrect = await urlDoc.isPasswordValid(password);
+        if (!isPasswordCorrect) {
+            throw new ApiError(401, "Password is incorrect");
+        }
+
+        await handleRedirect(req, res, urlDoc);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("", { redirectUrl: urlDoc.originalUrl }));
     },
 );

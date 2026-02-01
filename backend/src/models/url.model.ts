@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { IUrl } from "../interfaces/IUrl";
+import bcrypt from "bcrypt";
 
 const urlSchema = new mongoose.Schema<IUrl>(
     {
@@ -49,9 +50,37 @@ const urlSchema = new mongoose.Schema<IUrl>(
             ref: "Group",
             default: undefined,
         },
+        expiration: {
+            type: Date,
+        },
+        limit: {
+            type: Number,
+        },
+        notes: {
+            type: String,
+        },
+        password: {
+            type: String,
+        },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
+
+urlSchema.pre("save", async function () {
+    if (!this.isModified("password")) {
+        return;
+    }
+    if (!this.password) {
+        this.password = null;
+        return;
+    }
+
+    this.password = await bcrypt.hash(this.password, 10);
+});
+
+urlSchema.methods.isPasswordValid = async function (password: string) {
+    return await bcrypt.compare(password, this.password);
+};
 
 urlSchema.index({ owner: 1, createdAt: -1 });
 

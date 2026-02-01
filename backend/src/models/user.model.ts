@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema<IUser>(
         forgotPasswordExpiry: Date,
         refreshToken: String,
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 userSchema.pre("save", async function () {
@@ -75,7 +75,7 @@ userSchema.methods.generateAccessToken = function () {
             email: this.email,
         },
         ACCESS_TOKEN_SECRET,
-        { expiresIn: ACCESS_TOKEN_EXPIRY }
+        { expiresIn: ACCESS_TOKEN_EXPIRY },
     );
 };
 
@@ -87,7 +87,7 @@ userSchema.methods.generateRefreshToken = function () {
         REFRESH_TOKEN_SECRET,
         {
             expiresIn: REFRESH_TOKEN_EXPIRY,
-        }
+        },
     );
 };
 

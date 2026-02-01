@@ -17,6 +17,12 @@ export interface IUrl extends Document {
     createdAt: string;
     refs: IUrlRef[];
     groupId: Types.ObjectId | null;
+    expiration: Date;
+    limit: number | null;
+    notes: string;
+    password: string | null;
+
+    isPasswordValid(password: string): Promise<boolean>;
 }
 
 export interface UrlQuery {

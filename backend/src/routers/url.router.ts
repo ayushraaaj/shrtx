@@ -10,12 +10,15 @@ import {
     getUrlAnalytics,
     shortUrl,
     toggleUrlStatus,
+    verifyUrlPassword,
 } from "../controllers/url.controller";
 import { verifyJWT } from "../middlewares/auth.middleware";
 import { shortUrlValidator } from "../validators/url.validators";
 import { validate } from "../middlewares/validator.middleware";
 
 const router = Router();
+
+router.route("/verify-password").post(verifyUrlPassword);
 
 router.use(verifyJWT);
 
