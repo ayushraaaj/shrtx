@@ -611,6 +611,7 @@ const Dashboard = () => {
                 <ShowCreateGroupModal
                     onCloseGroupModal={() => setShowCreateGroupModal(false)}
                     fetchAllGroups={fetchAllGroups}
+                    setSelectedGroup={setSelectedGroup}
                 />
             )}
             {showCreateLinkModal && (

@@ -5,10 +5,11 @@ import { useState } from "react";
 interface Props {
     onCloseGroupModal(): void;
     fetchAllGroups(): void;
+    setSelectedGroup?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ShowCreateGroupModal = (props: Props) => {
-    const { onCloseGroupModal, fetchAllGroups } = props;
+    const { onCloseGroupModal, fetchAllGroups, setSelectedGroup } = props;
 
     const [groupName, setGroupName] = useState("");
     const [error, setError] = useState("");
@@ -24,6 +25,10 @@ const ShowCreateGroupModal = (props: Props) => {
 
             onCloseGroupModal();
             fetchAllGroups();
+
+            if (setSelectedGroup) {
+                setSelectedGroup(groupName);
+            }
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setError(

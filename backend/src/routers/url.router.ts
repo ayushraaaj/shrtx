@@ -8,6 +8,7 @@ import {
     getAllUrlAnalytics,
     getAllUrlDetails,
     getUrlAnalytics,
+    getUrlDetails,
     shortUrl,
     toggleUrlStatus,
     verifyUrlPassword,
@@ -33,5 +34,6 @@ router.route("/analytics/overview").get(getAllUrlAnalytics);
 router.route("/analytics/:id").get(getUrlAnalytics);
 router.route("/analytics/:id/export/pdf").post(exportUrlAnalytics);
 router.route("/analytics/export/overview/pdf").post(exportAllUrlsAnalytics);
+router.route("/details/:urlId").get(getUrlDetails);
 
 export default router;

@@ -72,7 +72,7 @@ const UrlTable = (props: Props) => {
                     </th>
 
                     <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                        Source Destination
+                        Destination URL
                     </th>
 
                     <th className="px-6 py-4 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-widest">

@@ -685,3 +685,35 @@ export const verifyUrlPassword = asyncHandler(
             .json(new ApiResponse("", { redirectUrl: urlDoc.originalUrl }));
     },
 );
+
+export const getUrlDetails = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findOne({ _id: urlId, owner: userId }).select(
+            "-owner -refs.createdAt -refs._id -updatedAt -__v",
+        );
+        if (!urlDoc) {
+            throw new ApiError(404, "Url details not found");
+        }
+
+        let groupId = urlDoc.groupId;
+        let groupDoc;
+        if (groupId) {
+            groupDoc = await Group.findById({ _id: urlDoc.groupId });
+        }
+
+        const response = {
+            ...urlDoc.toObject(),
+            shortUrl: `${BACKEND_URL}/${urlDoc.shortCode}`,
+            groupName: groupDoc ? groupDoc.groupName : null,
+        };
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse("Url details fetched successfully", response),
+            );
+    },
+);
