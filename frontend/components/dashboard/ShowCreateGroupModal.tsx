@@ -5,7 +5,7 @@ import { useState } from "react";
 interface Props {
     onCloseGroupModal(): void;
     fetchAllGroups(): void;
-    setSelectedGroup?: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedGroup?(selectedGroup: string): void;
 }
 
 const ShowCreateGroupModal = (props: Props) => {

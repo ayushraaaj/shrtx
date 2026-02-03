@@ -769,6 +769,67 @@ export const updateUrlExpiration = asyncHandler(
         urlDoc.expiration = expiration;
         urlDoc.save({ validateBeforeSave: false });
 
-        return res.status(200).json(new ApiResponse("Password is updated", {}));
+        return res
+            .status(200)
+            .json(new ApiResponse("Expiration is updated", {}));
+    },
+);
+
+export const updateUrlGroup = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+        const { groupName } = req.body;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findById({ _id: urlId });
+        if (!urlDoc) {
+            throw new ApiError(404, "Url not found");
+        }
+
+        const groupDoc = await Group.findOne({ groupName, owner: userId });
+        if (!groupDoc) {
+            throw new ApiError(404, "Group not found");
+        }
+
+        urlDoc.groupId = groupDoc._id;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res.status(200).json(new ApiResponse("Group is updated", {}));
+    },
+);
+
+export const updateUrlActiveStatus = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { isActive } = req.body;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findById({ _id: urlId });
+        if (!urlDoc) {
+            throw new ApiError(404, "Url not found");
+        }
+
+        urlDoc.isActive = isActive;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res
+            .status(200)
+            .json(new ApiResponse("URL status is updated", {}));
+    },
+);
+
+export const updateUrlNotes = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { notes } = req.body;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findById({ _id: urlId });
+        if (!urlDoc) {
+            throw new ApiError(404, "Url not found");
+        }
+
+        urlDoc.notes = notes;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res.status(200).json(new ApiResponse("URL note is updated", {}));
     },
 );

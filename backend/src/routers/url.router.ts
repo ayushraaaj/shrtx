@@ -11,8 +11,11 @@ import {
     getUrlDetails,
     shortUrl,
     toggleUrlStatus,
+    updateUrlActiveStatus,
     updateUrlClickLimit,
     updateUrlExpiration,
+    updateUrlGroup,
+    updateUrlNotes,
     updateUrlPassword,
     verifyUrlPassword,
 } from "../controllers/url.controller";
@@ -41,5 +44,8 @@ router.route("/details/:urlId").get(getUrlDetails);
 router.route("/limit/:urlId").patch(updateUrlClickLimit);
 router.route("/password/:urlId").patch(updateUrlPassword);
 router.route("/expiration/:urlId").patch(updateUrlExpiration);
+router.route("/group/:urlId").patch(updateUrlGroup);
+router.route("/status/:urlId").patch(updateUrlActiveStatus);
+router.route("/notes/:urlId").patch(updateUrlNotes);
 
 export default router;

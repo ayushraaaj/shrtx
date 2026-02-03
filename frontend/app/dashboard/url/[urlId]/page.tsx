@@ -46,12 +46,10 @@ const UrlDetailedView = () => {
     const [showUrlPasswordModal, setShowUrlPasswordModal] = useState(false);
     const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 
-    const [selectedGroup, setSelectedGroup] = useState("ungrouped");
-    const [isActive, setIsActive] = useState(false);
-
     const [urlGroups, setUrlGroups] = useState<Group[]>([]);
 
     const [isEditingUrlNotes, setIsEditingUrlNotes] = useState(false);
+    const [prevNotes, setPrevNotes] = useState("");
 
     const truncate = (text: string, max: number) =>
         text.length > max ? text.slice(0, max) + "..." : text;
@@ -98,9 +96,7 @@ const UrlDetailedView = () => {
         try {
             const res = await api.get(`/url/details/${urlId}`);
             setResponse(res.data.data);
-            // setNotes(res.data.data.notes || "");
-            setSelectedGroup(res.data.data.groupName || "ungrouped");
-            // setLimit(res.data.data.limit);
+            setPrevNotes(res.data.data.notes);
         } catch (error) {}
     };
 
@@ -169,6 +165,51 @@ const UrlDetailedView = () => {
         }
     };
 
+    const updateGroupName = async () => {
+        try {
+            const res = await api.patch(`/url/group/${response?._id}`, {
+                groupName: response?.groupName,
+            });
+        } catch (error) {}
+    };
+
+    const toggleUrlStatus = async () => {
+        try {
+            const res = await api.patch(`/url/status/${response?._id}`, {
+                isActive: !response?.isActive,
+            });
+
+            setResponse((prev) =>
+                prev ? { ...prev, isActive: !response?.isActive } : prev,
+            );
+        } catch (error) {}
+    };
+
+    const updateNotes = async () => {
+        if (!response?.notes) {
+            return;
+        }
+
+        try {
+            const res = await api.patch(`/url/notes/${response?._id}`, {
+                notes: response?.notes,
+            });
+
+            setResponse((prev) =>
+                prev ? { ...prev, notes: response?.notes } : prev,
+            );
+
+            setPrevNotes(response?.notes);
+
+            setIsEditingUrlNotes(false);
+        } catch (error) {}
+    };
+
+    const cancelButton = () => {
+        setResponse((prev) => (prev ? { ...prev, notes: prevNotes } : prev));
+        setIsEditingUrlNotes(false);
+    };
+
     useEffect(() => {
         if (!response) {
             return;
@@ -229,15 +270,17 @@ const UrlDetailedView = () => {
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => setIsActive(!isActive)}
+                            onClick={toggleUrlStatus}
                             className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all border shadow-sm ${
-                                isActive
+                                response?.isActive
                                     ? "bg-green-50 border-green-200 text-green-700"
                                     : "bg-zinc-100 border-zinc-200 text-zinc-400"
                             }`}
                         >
                             <PowerIcon className="w-4 h-4" />
-                            {isActive ? "Link Active" : "Link Inactive"}
+                            {response?.isActive
+                                ? "Link Active"
+                                : "Link Inactive"}
                         </button>
                         <button
                             title="Delete"
@@ -310,14 +353,19 @@ const UrlDetailedView = () => {
                                     Group
                                 </label>
                                 <select
-                                    value={selectedGroup}
+                                    value={response?.groupName || "ungrouped"}
                                     onChange={(e) => {
                                         const value = e.target.value;
+
                                         if (value === "createGroup") {
                                             setShowCreateGroupModal(true);
                                             return;
                                         }
-                                        setSelectedGroup(value);
+                                        setResponse((prev) =>
+                                            prev
+                                                ? { ...prev, groupName: value }
+                                                : prev,
+                                        );
                                     }}
                                     className="bg-zinc-50 border border-zinc-200 rounded-xl p-3 outline-none focus:border-blue-500 font-bold text-sm min-w-[500px]"
                                 >
@@ -340,7 +388,10 @@ const UrlDetailedView = () => {
                                     </option>
                                 </select>
                             </div>
-                            <button className="bg-zinc-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-zinc-800 self-end transition-all duration-500 active:scale-95">
+                            <button
+                                onClick={updateGroupName}
+                                className="bg-zinc-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-zinc-800 self-end transition-all duration-500 active:scale-95"
+                            >
                                 Save Changes
                             </button>
                         </section>
@@ -515,8 +566,14 @@ const UrlDetailedView = () => {
                                 Internal Notes
                             </h3>
                             <textarea
-                                // value={notes}
-                                // onChange={(e) => setNotes(e.target.value)}
+                                value={response?.notes || ""}
+                                onChange={(e) =>
+                                    setResponse((prev) =>
+                                        prev
+                                            ? { ...prev, notes: e.target.value }
+                                            : prev,
+                                    )
+                                }
                                 className={`w-full h-32 bg-zinc-50 border-none rounded-2xl p-4 text-sm font-medium ${isEditingUrlNotes ? "focus:ring-2 focus:ring-blue-500/10 transition-all" : ""} outline-none resize-none`}
                                 placeholder="Write private notes about this campaign..."
                                 readOnly={!isEditingUrlNotes}
@@ -537,16 +594,12 @@ const UrlDetailedView = () => {
                                         <button
                                             className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
                                             title="Save"
-                                            onClick={() =>
-                                                setIsEditingUrlNotes(false)
-                                            }
+                                            onClick={updateNotes}
                                         >
                                             <CheckIcon className="w-5 h-5 " />
                                         </button>
                                         <button
-                                            onClick={() =>
-                                                setIsEditingUrlNotes(false)
-                                            }
+                                            onClick={cancelButton}
                                             className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                                             title="Cancel"
                                         >
@@ -599,7 +652,13 @@ const UrlDetailedView = () => {
                     <ShowCreateGroupModal
                         onCloseGroupModal={() => setShowCreateGroupModal(false)}
                         fetchAllGroups={fetchAllGroups}
-                        setSelectedGroup={setSelectedGroup}
+                        setSelectedGroup={(selectedGroup) =>
+                            setResponse((prev) =>
+                                prev
+                                    ? { ...prev, groupName: selectedGroup }
+                                    : prev,
+                            )
+                        }
                     />
                 )}
             </div>
