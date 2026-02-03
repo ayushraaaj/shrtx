@@ -119,6 +119,7 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
 export const openShortUrl = asyncHandler(
     async (req: Request, res: Response) => {
         const { shortCode } = req.params;
+        const { ref } = req.query;
 
         const urlDoc = await Url.findOne({ shortCode });
 
@@ -133,10 +134,13 @@ export const openShortUrl = asyncHandler(
             return res.redirect(`${CLIENT_URL}/404`);
         }
 
+        let redirectUrl = `${CLIENT_URL}/url/verify-password?shortCode=${shortCode}`;
+        if (ref) {
+            redirectUrl += `&ref=${ref}`;
+        }
+
         if (urlDoc.password && urlDoc.password !== null) {
-            return res.redirect(
-                `${CLIENT_URL}/url/verify-password?shortCode=${shortCode}`,
-            );
+            return res.redirect(redirectUrl);
         }
 
         await handleRedirect(req, res, urlDoc);
@@ -658,7 +662,7 @@ export const exportAllUrlsAnalytics = asyncHandler(
 
 export const verifyUrlPassword = asyncHandler(
     async (req: Request, res: Response) => {
-        const { shortCode, password } = req.body;
+        const { shortCode, password, ref } = req.body;
 
         const urlDoc = await Url.findOne({ shortCode });
 
@@ -678,7 +682,7 @@ export const verifyUrlPassword = asyncHandler(
             throw new ApiError(401, "Password is incorrect");
         }
 
-        await handleRedirect(req, res, urlDoc);
+        await handleRedirect(req, res, urlDoc, ref);
 
         return res
             .status(200)
@@ -715,5 +719,56 @@ export const getUrlDetails = asyncHandler(
             .json(
                 new ApiResponse("Url details fetched successfully", response),
             );
+    },
+);
+
+export const updateUrlClickLimit = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { limit } = req.body;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findById({ _id: urlId });
+        if (!urlDoc) {
+            throw new ApiError(404, "Url not found");
+        }
+
+        urlDoc.limit = limit;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res.status(200).json(new ApiResponse("Limit is updated", {}));
+    },
+);
+
+export const updateUrlPassword = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { password } = req.body;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findById({ _id: urlId });
+        if (!urlDoc) {
+            throw new ApiError(404, "Url not found");
+        }
+
+        urlDoc.password = password;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res.status(200).json(new ApiResponse("Password is updated", {}));
+    },
+);
+
+export const updateUrlExpiration = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { expiration } = req.body;
+        const { urlId } = req.params;
+
+        const urlDoc = await Url.findById({ _id: urlId });
+        if (!urlDoc) {
+            throw new ApiError(404, "Url not found");
+        }
+
+        urlDoc.expiration = expiration;
+        urlDoc.save({ validateBeforeSave: false });
+
+        return res.status(200).json(new ApiResponse("Password is updated", {}));
     },
 );

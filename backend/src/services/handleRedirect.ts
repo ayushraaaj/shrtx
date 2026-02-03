@@ -5,9 +5,8 @@ export const handleRedirect = async (
     req: Request,
     res: Response,
     urlDoc: IUrl,
+    ref?: string | undefined,
 ) => {
-    const { ref } = req.query;
-
     urlDoc.clicks += 1;
     if (urlDoc.limit !== null) {
         urlDoc.limit -= 1;

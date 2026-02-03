@@ -5,7 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const UrlPassword = () => {
-    const shortCode = useSearchParams().get("shortCode");
+    const searchParams = useSearchParams();
+
+    const shortCode = searchParams.get("shortCode");
+    const ref = searchParams.get("ref");
+
     const router = useRouter();
 
     const [password, setPassword] = useState("");
@@ -21,6 +25,7 @@ const UrlPassword = () => {
             const res = await api.post(`/url/verify-password`, {
                 shortCode,
                 password,
+                ref,
             });
             router.replace(res.data.data.redirectUrl);
         } catch (error: unknown) {

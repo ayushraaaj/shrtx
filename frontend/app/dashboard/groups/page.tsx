@@ -230,7 +230,7 @@ const Groups = () => {
                                         <div>
                                             <button
                                                 className="p-2.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                                title="Edit Group Name"
+                                                title="Save"
                                                 onClick={onUpdateGroupName}
                                             >
                                                 <CheckIcon className="w-5 h-5 " />
@@ -241,7 +241,7 @@ const Groups = () => {
                                                     setNewGroupName("");
                                                 }}
                                                 className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                                title="Edit Group Name"
+                                                title="Cancel"
                                             >
                                                 <XMarkIcon className="w-5 h-5" />
                                             </button>

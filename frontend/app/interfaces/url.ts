@@ -43,7 +43,7 @@ export interface UrlDetails {
     isActive: boolean;
     refs: UrlRef[];
     groupId: string | null;
-    expiration: string | null;
+    expiration: Date | null;
     limit: number | null;
     notes: string | null;
     password: string | null;

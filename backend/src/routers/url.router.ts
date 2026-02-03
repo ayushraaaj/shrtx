@@ -11,6 +11,9 @@ import {
     getUrlDetails,
     shortUrl,
     toggleUrlStatus,
+    updateUrlClickLimit,
+    updateUrlExpiration,
+    updateUrlPassword,
     verifyUrlPassword,
 } from "../controllers/url.controller";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -35,5 +38,8 @@ router.route("/analytics/:id").get(getUrlAnalytics);
 router.route("/analytics/:id/export/pdf").post(exportUrlAnalytics);
 router.route("/analytics/export/overview/pdf").post(exportAllUrlsAnalytics);
 router.route("/details/:urlId").get(getUrlDetails);
+router.route("/limit/:urlId").patch(updateUrlClickLimit);
+router.route("/password/:urlId").patch(updateUrlPassword);
+router.route("/expiration/:urlId").patch(updateUrlExpiration);
 
 export default router;
