@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const app = require("../dist/app.js");
+const path = require("path");
+const app = require(path.join(__dirname, "../dist/app.js"));
 
 module.exports = app;
