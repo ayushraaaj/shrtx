@@ -5,7 +5,9 @@
             "src": "src/index.ts",
             "use": "@vercel/node",
             "config": {
-                "bundle": true
+                "bundle": true,
+                "helpers": true,
+                "nodeVersion": "20.x"
             }
         }
     ],
