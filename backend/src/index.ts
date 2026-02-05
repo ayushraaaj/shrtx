@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import connectDB from "./db/database.js";
+import connectDB from "./db/database";
 import app from "./app";
 import { PORT } from "./config/env";
 
