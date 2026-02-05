@@ -46,5 +46,6 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "allowJs": true
-    }
+    },
+    "include": ["src/**/*", "api/**/*"]
 }
