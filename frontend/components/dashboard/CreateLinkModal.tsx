@@ -5,6 +5,7 @@ import { useState } from "react";
 import ExpirationModal from "./ExpirationModal";
 import ClickLimitModal from "./ClickLimitModal";
 import UrlPasswordModal from "./UrlPasswordModal";
+import ShowCreateGroupModal from "./ShowCreateGroupModal";
 
 interface Group {
     groupName: string;
@@ -15,17 +16,12 @@ interface Props {
     onUrlCreated(): void;
     urlGroups: Group[];
     truncate(text: string, max: number): string;
-    openCreateGroupModal(): void;
+    fetchAllGroups(): void;
 }
 
 const CreateLinkModal = (props: Props) => {
-    const {
-        onCloseModal,
-        onUrlCreated,
-        urlGroups,
-        truncate,
-        openCreateGroupModal,
-    } = props;
+    const { onCloseModal, onUrlCreated, urlGroups, truncate, fetchAllGroups } =
+        props;
 
     const [originalUrl, setOriginalUrl] = useState("");
     const [customName, setCustomName] = useState("");
@@ -37,6 +33,8 @@ const CreateLinkModal = (props: Props) => {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 
     const [showExpirationModal, setShowExpirationModal] = useState(false);
     const [showClickLimitModal, setShowClickLimitModal] = useState(false);
@@ -183,7 +181,7 @@ const CreateLinkModal = (props: Props) => {
                                     onChange={(e) => {
                                         const value = e.target.value;
                                         if (value === "createGroup") {
-                                            openCreateGroupModal();
+                                            setShowCreateGroupModal(true);
                                             return;
                                         }
                                         setSelectedGroup(value);
@@ -295,6 +293,13 @@ const CreateLinkModal = (props: Props) => {
                 <UrlPasswordModal
                     closeUrlPasswordModal={() => setShowUrlPasswordModal(false)}
                     onSetPassword={(pwd) => setPassword(pwd)}
+                />
+            )}
+            {showCreateGroupModal && (
+                <ShowCreateGroupModal
+                    onCloseGroupModal={() => setShowCreateGroupModal(false)}
+                    fetchAllGroups={fetchAllGroups}
+                    setSelectedGroup={setSelectedGroup}
                 />
             )}
         </>

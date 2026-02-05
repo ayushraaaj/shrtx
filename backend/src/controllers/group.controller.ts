@@ -25,7 +25,7 @@ export const createGroupName = asyncHandler(
         return res
             .status(201)
             .json(new ApiResponse("Group created successfully", group));
-    }
+    },
 );
 
 export const getAllGroups = asyncHandler(
@@ -37,9 +37,9 @@ export const getAllGroups = asyncHandler(
         return res
             .status(200)
             .json(
-                new ApiResponse("All groups are fetched successfully", groups)
+                new ApiResponse("All groups are fetched successfully", groups),
             );
-    }
+    },
 );
 
 export const bulkAssignUrlsToGroup = asyncHandler(
@@ -59,7 +59,7 @@ export const bulkAssignUrlsToGroup = asyncHandler(
 
         const urlDoc = await Url.updateMany(
             { _id: { $in: urlIds }, owner: userId },
-            { $set: { groupId: group._id } }
+            { $set: { groupId: group._id } },
         );
 
         return res
@@ -67,10 +67,10 @@ export const bulkAssignUrlsToGroup = asyncHandler(
             .json(
                 new ApiResponse(
                     `Urls successfully assigned to ${groupName}`,
-                    {}
-                )
+                    {},
+                ),
             );
-    }
+    },
 );
 
 export const bulkRemoveUrlsFromGroup = asyncHandler(
@@ -86,7 +86,7 @@ export const bulkRemoveUrlsFromGroup = asyncHandler(
 
         const urlDoc = await Url.updateMany(
             { _id: { $in: urlIds }, owner: userId },
-            { $set: { groupId: null } }
+            { $set: { groupId: null } },
         );
 
         return res
@@ -94,15 +94,16 @@ export const bulkRemoveUrlsFromGroup = asyncHandler(
             .json(
                 new ApiResponse(
                     `Urls successfully removed from ${groupName}`,
-                    {}
-                )
+                    {},
+                ),
             );
-    }
+    },
 );
 
 export const deleteGroup = asyncHandler(async (req: Request, res: Response) => {
     const { groupId } = req.params;
     const userId = req.user?._id;
+    const { option } = req.body;
 
     const group = await Group.findOne({ _id: groupId, owner: userId });
 
@@ -110,10 +111,16 @@ export const deleteGroup = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(404, "Group not found");
     }
 
-    await Url.updateMany(
-        { groupId: group._id, owner: userId },
-        { $set: { groupId: null } }
-    );
+    if (option === "withoutUrl") {
+        await Url.updateMany(
+            { groupId: group._id, owner: userId },
+            { $set: { groupId: null } },
+        );
+    }
+
+    if (option === "withUrl") {
+        await Url.deleteMany({ groupId: group._id, owner: userId });
+    }
 
     await Group.deleteOne({ _id: groupId });
 
@@ -149,7 +156,7 @@ export const updateGroupName = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("Successfully updated group name", {}));
-    }
+    },
 );
 
 export const groupAnalytics = asyncHandler(
@@ -178,7 +185,7 @@ export const groupAnalytics = asyncHandler(
             new ApiResponse("Group analytics fetched successfully", {
                 ...response,
                 groupName,
-            })
+            }),
         );
-    }
+    },
 );

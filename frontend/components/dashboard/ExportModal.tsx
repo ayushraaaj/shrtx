@@ -37,7 +37,7 @@ const ExportModal = (props: Props) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
             <div className="bg-white w-96 rounded-xl p-6 shadow-lg">
                 <h2 className="text-lg font-bold mb-4">Export URLs</h2>
 

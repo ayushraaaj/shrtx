@@ -1,5 +1,6 @@
 "use client";
 import ShowCreateGroupModal from "@/components/dashboard/ShowCreateGroupModal";
+import DeleteConfirmationModal from "@/components/groups/DeleteConfirmationModal";
 import { api } from "@/lib/axios";
 import {
     ArrowLeftIcon,
@@ -11,8 +12,6 @@ import {
     CheckIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline";
-import axios from "axios";
-import { groupCollapsed } from "console";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -27,6 +26,9 @@ const Groups = () => {
     const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const [editingGroupId, setEditingGroupId] = useState("");
+    const [selectedGroupId, setSelectedGroupId] = useState("");
+
+    const [showDeleteConfirmModal, setDeleteConfirmModal] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,21 +54,18 @@ const Groups = () => {
         }
     };
 
-    const onDeleteGroup = async (groupId: string) => {
-        const confirmDelete = confirm(
-            "Are you sure you want to delete this Group?",
-        );
-
-        if (!confirmDelete) {
+    const handleDelete = async (option: string) => {
+        if (!option) {
             return;
         }
+        console.log(option);
 
         try {
-            const res = await api.delete(`/group/${groupId}/delete`);
+            const res = await api.delete(`/group/${selectedGroupId}/delete`, {
+                data: { option },
+            });
 
-            setUrlGroups((prev) =>
-                prev.filter((group) => group._id !== groupId),
-            );
+            fetchAllGroups();
         } catch (error) {}
     };
 
@@ -248,7 +247,10 @@ const Groups = () => {
                                         </div>
                                     )}
                                     <button
-                                        onClick={() => onDeleteGroup(group._id)}
+                                        onClick={() => {
+                                            setSelectedGroupId(group._id);
+                                            setDeleteConfirmModal(true);
+                                        }}
                                         className="p-2.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                         title="Delete Group"
                                     >
@@ -271,6 +273,13 @@ const Groups = () => {
                 <ShowCreateGroupModal
                     onCloseGroupModal={() => setShowCreateGroupModal(false)}
                     fetchAllGroups={fetchAllGroups}
+                    
+                />
+            )}
+            {showDeleteConfirmModal && (
+                <DeleteConfirmationModal
+                    closeDeleteConfirmModal={() => setDeleteConfirmModal(false)}
+                    onDelete={(option) => handleDelete(option)}
                 />
             )}
         </div>

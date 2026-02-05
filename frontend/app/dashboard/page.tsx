@@ -509,7 +509,8 @@ const Dashboard = () => {
                     }}
                     urlGroups={urlGroups}
                     truncate={truncate}
-                    openCreateGroupModal={() => setShowCreateGroupModal(true)}
+                    fetchAllGroups={fetchAllGroups}
+
                 />
             )}
         </div>
