@@ -7,6 +7,12 @@ dotenv.config({ path: "./.env" });
 
 connectDB();
 
-app.listen(PORT || 8000, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// app.listen(PORT || 8000, () => {
+//     console.log(`Server is running on port ${PORT}`);
+// });
+
+if (process.env.NODE_ENV !== "production") {
+    app.listen(PORT, () => {
+        console.log(`Server running on ${PORT}`);
+    });
+}
