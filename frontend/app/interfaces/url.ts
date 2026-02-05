@@ -1,7 +1,7 @@
 export interface UrlRef {
     source: string;
     clicks: number;
-    // [key: string]: string | number;
+    [key: string]: string | number;
 }
 
 export interface UrlApiItem {
