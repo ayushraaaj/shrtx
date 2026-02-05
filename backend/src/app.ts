@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { CLIENT_URL } from "./config/env";
 
 const app = express();
 
@@ -9,7 +10,7 @@ app.use(
         // origin: "http://localhost:3000",
         origin: `${CLIENT_URL}`,
         credentials: true,
-    })
+    }),
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
@@ -19,7 +20,6 @@ import healthCheckRouter from "./routers/healthcheck.route";
 import authRouter from "./routers/auth.router";
 import urlRouter from "./routers/url.router";
 import redirectRouter from "./routers/redirect.router";
-import { CLIENT_URL } from "./config/env";
 
 import groupRouter from "./routers/group.router";
 import documentRouter from "./routers/document.router";
