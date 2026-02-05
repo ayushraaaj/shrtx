@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { IUrl } from "../interfaces/IUrl";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 const urlSchema = new mongoose.Schema<IUrl>(
     {
@@ -75,11 +75,11 @@ urlSchema.pre("save", async function () {
         return;
     }
 
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcryptjs.hash(this.password, 10);
 });
 
 urlSchema.methods.isPasswordValid = async function (password: string) {
-    return await bcrypt.compare(password, this.password);
+    return await bcryptjs.compare(password, this.password);
 };
 
 urlSchema.index({ owner: 1, createdAt: -1 });

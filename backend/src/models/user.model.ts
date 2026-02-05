@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {
     ACCESS_TOKEN_EXPIRY,
@@ -60,11 +60,11 @@ userSchema.pre("save", async function () {
         return;
     }
 
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcryptjs.hash(this.password, 10);
 });
 
 userSchema.methods.isPasswordValid = async function (password: string) {
-    return await bcrypt.compare(password, this.password);
+    return await bcryptjs.compare(password, this.password);
 };
 
 userSchema.methods.generateAccessToken = function () {
