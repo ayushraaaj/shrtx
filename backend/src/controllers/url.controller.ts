@@ -109,7 +109,7 @@ export const shortUrl = asyncHandler(async (req: Request, res: Response) => {
         password,
     });
 
-    const shortenedUrl = `${BACKEND_URL}/${shortCode}`;
+    const shortenedUrl = `${CLIENT_URL}/${shortCode}`;
 
     return res
         .status(201)
@@ -223,7 +223,7 @@ export const getAllUrlDetails = asyncHandler(
         const urlsData = {
             urls: urls.map((url) => ({
                 ...url,
-                shortUrl: `${BACKEND_URL}/${url.shortCode}`,
+                shortUrl: `${CLIENT_URL}/${url.shortCode}`,
             })),
             pagination: {
                 currentPage: page,
