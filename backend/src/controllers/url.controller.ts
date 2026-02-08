@@ -131,7 +131,7 @@ export const openShortUrl = asyncHandler(
             urlDoc.limit === 0 ||
             (urlDoc.expiration !== null && urlDoc.expiration < now)
         ) {
-            return res.redirect(`${CLIENT_URL}/404`);
+            return res.redirect(`${CLIENT_URL}/url/404`);
         }
 
         let redirectUrl = `${CLIENT_URL}/url/verify-password?shortCode=${shortCode}`;
@@ -710,7 +710,7 @@ export const getUrlDetails = asyncHandler(
 
         const response = {
             ...urlDoc.toObject(),
-            shortUrl: `${BACKEND_URL}/${urlDoc.shortCode}`,
+            shortUrl: `${CLIENT_URL}/${urlDoc.shortCode}`,
             groupName: groupDoc ? groupDoc.groupName : null,
         };
 

@@ -195,7 +195,7 @@ const UrlTableRow = (props: Props) => {
 
                                 <div className="divide-y divide-zinc-50">
                                     {url.refs.map((ref) => {
-                                        const refUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${url.shortCode}?ref=${ref.source}`;
+                                        const refUrl = `${process.env.NEXT_PUBLIC_CLIENT_URL}/${url.shortCode}?ref=${ref.source}`;
                                         return (
                                             <div
                                                 key={ref.source}
