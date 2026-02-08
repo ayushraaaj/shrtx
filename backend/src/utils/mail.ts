@@ -1,19 +1,19 @@
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 import {
-    MAILTRAP_SMTP_HOST,
-    MAILTRAP_SMTP_PASS,
-    MAILTRAP_SMTP_PORT,
-    MAILTRAP_SMTP_USER,
+    BREVO_SMTP_HOST,
+    BREVO_SMTP_PASS,
+    BREVO_SMTP_PORT,
+    BREVO_SMTP_USER,
 } from "../config/env";
 import { SendEmailOptions } from "../interfaces/SendEmailOptions";
 
 const transport = nodemailer.createTransport({
-    host: MAILTRAP_SMTP_HOST,
-    port: Number(MAILTRAP_SMTP_PORT),
+    host: BREVO_SMTP_HOST,
+    port: Number(BREVO_SMTP_PORT),
     auth: {
-        user: MAILTRAP_SMTP_USER,
-        pass: MAILTRAP_SMTP_PASS,
+        user: BREVO_SMTP_USER,
+        pass: BREVO_SMTP_PASS,
     },
 });
 
@@ -27,12 +27,13 @@ export const sendEmail = async (options: SendEmailOptions) => {
     });
 
     const emailTextual = mailGenerator.generatePlaintext(
-        options.mailgenContent
+        options.mailgenContent,
     );
     const emailHtml = mailGenerator.generate(options.mailgenContent);
 
     const mail = {
-        from: "mail.taskmanager@projectmanagement.pgm",
+        // from: "mail.taskmanager@projectmanagement.pgm",
+        from: '"Shrtx" <ayushrajar000@gmail.com>',
         to: options.email,
         subject: options.subject,
         text: emailTextual,
@@ -48,7 +49,7 @@ export const sendEmail = async (options: SendEmailOptions) => {
 
 export const emailVerificationMailgenContent = (
     fullname: string,
-    verificationUrl: string
+    verificationUrl: string,
 ) => {
     return {
         body: {
@@ -69,7 +70,7 @@ export const emailVerificationMailgenContent = (
 
 export const forgotPasswordMailgenContent = (
     fullname: string,
-    passwordResetUrl: string
+    passwordResetUrl: string,
 ) => {
     return {
         body: {

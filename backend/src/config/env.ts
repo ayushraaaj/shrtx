@@ -28,10 +28,10 @@ export const REFRESH_TOKEN_EXPIRY = getEnv(
     "REFRESH_TOKEN_EXPIRY"
 ) as StringValue;
 
-export const MAILTRAP_SMTP_HOST = getEnv("MAILTRAP_SMTP_HOST");
-export const MAILTRAP_SMTP_PORT = getEnv("MAILTRAP_SMTP_PORT");
-export const MAILTRAP_SMTP_USER = getEnv("MAILTRAP_SMTP_USER");
-export const MAILTRAP_SMTP_PASS = getEnv("MAILTRAP_SMTP_PASS");
+export const BREVO_SMTP_HOST = getEnv("BREVO_SMTP_HOST");
+export const BREVO_SMTP_PORT = getEnv("BREVO_SMTP_PORT");
+export const BREVO_SMTP_USER = getEnv("BREVO_SMTP_USER");
+export const BREVO_SMTP_PASS = getEnv("BREVO_SMTP_PASS");
 
 export const CLIENT_URL = getEnv("CLIENT_URL");
 export const BACKEND_URL = getEnv("BACKEND_URL");
