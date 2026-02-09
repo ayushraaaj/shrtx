@@ -82,6 +82,4 @@ urlSchema.methods.isPasswordValid = async function (password: string) {
     return await bcryptjs.compare(password, this.password);
 };
 
-urlSchema.index({ owner: 1, createdAt: -1 });
-
 export const Url = mongoose.model<IUrl>("urls", urlSchema);

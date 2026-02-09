@@ -22,6 +22,7 @@ import {
 import { verifyJWT } from "../middlewares/auth.middleware";
 import { shortUrlValidator } from "../validators/url.validators";
 import { validate } from "../middlewares/validator.middleware";
+import { requirePro } from "../middlewares/pro.middleware";
 
 const router = Router();
 
@@ -41,11 +42,14 @@ router.route("/analytics/:id").get(getUrlAnalytics);
 router.route("/analytics/:id/export/pdf").post(exportUrlAnalytics);
 router.route("/analytics/export/overview/pdf").post(exportAllUrlsAnalytics);
 router.route("/details/:urlId").get(getUrlDetails);
-router.route("/limit/:urlId").patch(updateUrlClickLimit);
-router.route("/password/:urlId").patch(updateUrlPassword);
-router.route("/expiration/:urlId").patch(updateUrlExpiration);
 router.route("/group/:urlId").patch(updateUrlGroup);
 router.route("/status/:urlId").patch(updateUrlActiveStatus);
 router.route("/notes/:urlId").patch(updateUrlNotes);
+
+router.use(requirePro);
+
+router.route("/limit/:urlId").patch(updateUrlClickLimit);
+router.route("/password/:urlId").patch(updateUrlPassword);
+router.route("/expiration/:urlId").patch(updateUrlExpiration);
 
 export default router;

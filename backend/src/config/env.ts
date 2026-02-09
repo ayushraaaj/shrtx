@@ -25,7 +25,7 @@ export const ACCESS_TOKEN_EXPIRY = getEnv("ACCESS_TOKEN_EXPIRY") as StringValue;
 
 export const REFRESH_TOKEN_SECRET = getEnv("REFRESH_TOKEN_SECRET");
 export const REFRESH_TOKEN_EXPIRY = getEnv(
-    "REFRESH_TOKEN_EXPIRY"
+    "REFRESH_TOKEN_EXPIRY",
 ) as StringValue;
 
 export const BREVO_SMTP_HOST = getEnv("BREVO_SMTP_HOST");
@@ -36,3 +36,8 @@ export const BREVO_SMTP_PASS = getEnv("BREVO_SMTP_PASS");
 export const CLIENT_URL = getEnv("CLIENT_URL");
 export const BACKEND_URL = getEnv("BACKEND_URL");
 
+export const RAZORPAY_KEY_ID = getEnv("RAZORPAY_KEY_ID");
+export const RAZORPAY_KEY_SECRET = getEnv("RAZORPAY_KEY_SECRET");
+export const RAZORPAY_PLAN_ID = getEnv("RAZORPAY_PLAN_ID");
+
+export const RAZORPAY_WEBHOOK_SECRET = getEnv("RAZORPAY_WEBHOOK_SECRET");

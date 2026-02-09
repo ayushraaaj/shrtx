@@ -16,7 +16,7 @@ export const verifyJWT = asyncHandler(
         try {
             const decodedToken = jwt.verify(
                 token,
-                ACCESS_TOKEN_SECRET
+                ACCESS_TOKEN_SECRET,
             ) as JwtPayload;
 
             const user = await User.findById(decodedToken?._id);
@@ -29,5 +29,5 @@ export const verifyJWT = asyncHandler(
             throw new ApiError(401, "Invalid access token");
         }
         next();
-    }
+    },
 );
