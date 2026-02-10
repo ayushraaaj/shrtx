@@ -8,6 +8,11 @@ import { ApiResponse } from "../utils/ApiResponse";
 
 export const razorpayWebhook = asyncHandler(
     async (req: Request, res: Response) => {
+        console.log("🔔 Razorpay webhook received");
+
+        console.log("Headers:", req.headers);
+        console.log("Body:", req.body);
+
         const expectedSignature = crypto
             .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
             .update(req.body)
@@ -16,14 +21,20 @@ export const razorpayWebhook = asyncHandler(
         const razorpaySignature = req.headers["x-razorpay-signature"];
 
         if (expectedSignature !== razorpaySignature) {
+            console.log("❌ Signature mismatch");
             throw new ApiError(400, "Invalid signature");
         }
 
+        console.log("✅ Signature verified");
+
         const event = req.body.event; // subscription.activated, subscription.cancelled
+        console.log("Event:", event);
 
         if (event === "subscription.activated") {
             const razorpaySubscriptionId =
                 req.body.payload.subscription.entity.id;
+            
+            console.log("Activating subscription:", razorpaySubscriptionId);
 
             await Subscription.findOneAndUpdate(
                 {
