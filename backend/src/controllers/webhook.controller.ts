@@ -13,6 +13,8 @@ export const razorpayWebhook = asyncHandler(
         console.log("Headers:", req.headers);
         console.log("Body:", req.body);
 
+        const rawBody = req.body as Buffer;
+
         const expectedSignature = crypto
             .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
             .update(req.body)
@@ -27,13 +29,15 @@ export const razorpayWebhook = asyncHandler(
 
         console.log("✅ Signature verified");
 
-        const event = req.body.event; // subscription.activated, subscription.cancelled
+        const payload = JSON.parse(rawBody.toString('utf-8'));
+
+        const event = payload.event; // subscription.activated, subscription.cancelled
         console.log("Event:", event);
 
         if (event === "subscription.activated") {
             const razorpaySubscriptionId =
                 req.body.payload.subscription.entity.id;
-            
+
             console.log("Activating subscription:", razorpaySubscriptionId);
 
             await Subscription.findOneAndUpdate(
