@@ -4,6 +4,7 @@ import { Subscription } from "../models/subscription.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import razorpay from "../config/razorpay";
 import { RAZORPAY_PLAN_ID } from "../config/env";
+import { ApiError } from "../utils/ApiError";
 
 export const createSubscription = asyncHandler(
     async (req: Request, res: Response) => {
@@ -15,14 +16,12 @@ export const createSubscription = asyncHandler(
         });
 
         if (existingSubscription) {
-            return res
-                .status(200)
-                .json(
-                    new ApiResponse("Subscription already exists", {
-                        subscriptionId: existingSubscription.subscriptionId,
-                        status: existingSubscription.status,
-                    }),
-                );
+            return res.status(200).json(
+                new ApiResponse("Subscription already exists", {
+                    subscriptionId: existingSubscription.subscriptionId,
+                    status: existingSubscription.status,
+                }),
+            );
         }
 
         const razorpaySubscription = await razorpay.subscriptions.create({
@@ -60,5 +59,26 @@ export const proSubscription = asyncHandler(
         }
 
         return res.status(200).json(new ApiResponse("", { isPro: true }));
+    },
+);
+
+export const cancelSubscription = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+
+        const subscription = await Subscription.findOne({
+            userId,
+            status: "active",
+        });
+
+        if (!subscription) {
+            throw new ApiError(400, "No active subscription found");
+        }
+
+        await razorpay.subscriptions.cancel(subscription.subscriptionId, 1);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Subscription cancelled", {}));
     },
 );

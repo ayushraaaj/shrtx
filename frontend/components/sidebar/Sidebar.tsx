@@ -52,6 +52,11 @@ const Sidebar = () => {
                     label="Document Processing"
                     icon={<DocumentTextIcon className="w-5 h-5" />}
                 />
+                <SidebarItem
+                    href="/dashboard/settings"
+                    label="Settings"
+                    icon={<DocumentTextIcon className="w-5 h-5" />}
+                />
             </nav>
 
             <div className="p-4 border-t border-zinc-50">

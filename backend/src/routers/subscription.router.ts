@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
 import {
+    cancelSubscription,
     createSubscription,
     proSubscription,
 } from "../controllers/subscription.controller";
@@ -11,5 +12,6 @@ router.use(verifyJWT);
 
 router.route("/create").post(createSubscription);
 router.route("/me").get(proSubscription);
+router.route("/cancel").post(cancelSubscription);
 
 export default router;
