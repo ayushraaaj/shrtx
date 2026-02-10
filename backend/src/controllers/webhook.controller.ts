@@ -34,9 +34,11 @@ export const razorpayWebhook = asyncHandler(
         const event = payload.event; // subscription.activated, subscription.cancelled
         console.log("Event:", event);
 
+        console.log("FULL PAYLOAD:", JSON.stringify(payload, null, 2));
+
         if (event === "subscription.activated") {
             const razorpaySubscriptionId =
-                req.body.payload.subscription.entity.id;
+                payload.payload.subscription.entity.id;
 
             console.log("Activating subscription:", razorpaySubscriptionId);
 
@@ -50,7 +52,7 @@ export const razorpayWebhook = asyncHandler(
 
         if (event === "subscription.cancelled") {
             const razorpaySubscriptionId =
-                req.body.payload.subscription.entity.id;
+                payload.payload.subscription.entity.id;
 
             await Subscription.findOneAndUpdate(
                 {
