@@ -6,6 +6,7 @@ import {
     LinkIcon,
     TagIcon,
     DocumentTextIcon,
+    Cog8ToothIcon,
 } from "@heroicons/react/24/outline";
 import Logout from "../logout/Logout";
 import Link from "next/link";
@@ -55,7 +56,7 @@ const Sidebar = () => {
                 <SidebarItem
                     href="/dashboard/settings"
                     label="Settings"
-                    icon={<DocumentTextIcon className="w-5 h-5" />}
+                    icon={<Cog8ToothIcon className="w-5 h-5" />}
                 />
             </nav>
 

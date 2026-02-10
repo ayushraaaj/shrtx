@@ -10,6 +10,7 @@ interface Props {
 }
 
 const getActiveTab = (pathname: string) => {
+    if (pathname.includes("/settings")) return "settings";
     if (pathname.includes("/analytics")) return "analytics";
 
     if (pathname.startsWith("/dashboard/url")) return "dashboard";
@@ -22,11 +23,12 @@ const getActiveTab = (pathname: string) => {
 };
 
 const getTabKeyFromHref = (href: string) => {
+    if (href.includes("settings")) return "settings";
     if (href.includes("analytics")) return "analytics";
     if (href.includes("group")) return "group";
     if (href.includes("document")) return "document";
     if (href.includes("dashboard")) return "dashboard";
-    
+
     return null;
 };
 
