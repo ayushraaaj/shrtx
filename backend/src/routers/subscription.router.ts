@@ -1,11 +1,15 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
-import { createSubscription } from "../controllers/subscription.controller";
+import {
+    createSubscription,
+    proSubscription,
+} from "../controllers/subscription.controller";
 
 const router = Router();
 
 router.use(verifyJWT);
 
-router.route("/create-subscription").post(createSubscription);
+router.route("/create").post(createSubscription);
+router.route("/me").get(proSubscription);
 
 export default router;

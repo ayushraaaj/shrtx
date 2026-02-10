@@ -1,7 +1,7 @@
 "use client";
 import { api } from "@/lib/axios";
 import axios from "axios";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
     CloudArrowUpIcon,
     DocumentIcon,
@@ -9,13 +9,26 @@ import {
     CheckCircleIcon,
     ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import UpgradeModal from "@/components/subscription/UpgradeModal";
 
 const Document = () => {
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState({ message: "", type: "" });
     const [file, setFile] = useState<File | null>(null);
 
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const checkSubscription = async () => {
+        try {
+            const res = await api.get("/subscription/me");
+            console.log(res.data.data.isPro);
+            if (!res.data.data.isPro) {
+                setShowUpgradeModal(true);
+            }
+        } catch (error) {}
+    };
 
     const onUpload = async () => {
         if (!file) {
@@ -70,141 +83,149 @@ const Document = () => {
         }
     };
 
-    return (
-        <div className="min-h-screen bg-zinc-50 pb-20 font-sans">
-            <header className="mb-10 mx-4">
-                <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
-                    Document Processing
-                </h1>
-                <p className="text-zinc-500 mt-1">
-                    Upload Excel or PDF files for automated processing.
-                </p>
-            </header>
+    useEffect(() => {
+        checkSubscription();
+    }, []);
 
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm">
-                    <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`relative border-2 border-dashed rounded-2xl p-12 transition-all cursor-pointer flex flex-col items-center justify-center gap-4
+    return (
+        <>
+            <div className="min-h-screen bg-zinc-50 font-sans">
+                <header className="mb-10 mx-4">
+                    <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
+                        Document Processing
+                    </h1>
+                    <p className="text-zinc-500 mt-1">
+                        Upload Excel or PDF files for automated processing.
+                    </p>
+                </header>
+
+                <div className="max-w-4xl mx-auto">
+                    <div className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-sm">
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`relative border-2 border-dashed rounded-2xl p-12 transition-all cursor-pointer flex flex-col items-center justify-center gap-4
                             ${
                                 file
                                     ? "border-blue-500 bg-blue-50/30"
                                     : "border-zinc-200 hover:border-blue-400 hover:bg-zinc-50"
                             }`}
-                    >
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            accept=".xlsx, .xls, .pdf"
-                            onChange={(e) =>
-                                setFile(e.target.files?.[0] || null)
-                            }
-                        />
+                        >
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept=".xlsx, .xls, .pdf"
+                                onChange={(e) =>
+                                    setFile(e.target.files?.[0] || null)
+                                }
+                            />
 
-                        {file ? (
-                            <div className="flex flex-col items-center animate-in fade-in zoom-in-95">
-                                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-2">
-                                    <DocumentIcon className="w-8 h-8" />
-                                </div>
-                                <p className="text-zinc-900 font-bold">
-                                    {file.name}
-                                </p>
-                                <p className="text-zinc-400 text-sm">
-                                    {(file.size / 1024).toFixed(2)} KB
-                                </p>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setFile(null);
-                                    }}
-                                    className="mt-4 text-xs font-bold text-red-500 hover:text-red-600 flex items-center gap-1"
-                                >
-                                    <XMarkIcon className="w-4 h-4" /> REMOVE
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="w-16 h-16 bg-zinc-100 text-zinc-400 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
-                                    <CloudArrowUpIcon className="w-8 h-8" />
-                                </div>
-                                <div className="text-center">
+                            {file ? (
+                                <div className="flex flex-col items-center animate-in fade-in zoom-in-95">
+                                    <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-2">
+                                        <DocumentIcon className="w-8 h-8" />
+                                    </div>
                                     <p className="text-zinc-900 font-bold">
-                                        Click to upload or drag and drop
+                                        {file.name}
                                     </p>
-                                    <p className="text-zinc-400 text-sm mt-1">
-                                        Supported formats: Excel (.xlsx, .xls,
-                                        .pdf)
+                                    <p className="text-zinc-400 text-sm">
+                                        {(file.size / 1024).toFixed(2)} KB
                                     </p>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setFile(null);
+                                        }}
+                                        className="mt-4 text-xs font-bold text-red-500 hover:text-red-600 flex items-center gap-1"
+                                    >
+                                        <XMarkIcon className="w-4 h-4" /> REMOVE
+                                    </button>
                                 </div>
-                            </>
-                        )}
-                    </div>
+                            ) : (
+                                <>
+                                    <div className="w-16 h-16 bg-zinc-100 text-zinc-400 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                                        <CloudArrowUpIcon className="w-8 h-8" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-zinc-900 font-bold">
+                                            Click to upload or drag and drop
+                                        </p>
+                                        <p className="text-zinc-400 text-sm mt-1">
+                                            Supported formats: Excel (.xlsx,
+                                            .xls, .pdf)
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
-                    <button
-                        onClick={onUpload}
-                        disabled={loading || !file}
-                        className={`w-full mt-8 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
-                            loading || !file
-                                ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
-                                : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20 active:scale-[0.98] cursor-pointer"
-                        }`}
-                    >
-                        {loading ? (
-                            <>
-                                <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                                Processing File...
-                            </>
-                        ) : (
-                            "Process & Download"
-                        )}
-                    </button>
-
-                    {response.message && (
-                        <div
-                            className={`mt-6 p-4 rounded-xl border flex items-center gap-3 animate-in slide-in-from-top-2 ${
-                                response.type === "success"
-                                    ? "bg-green-50 border-green-100 text-green-700"
-                                    : "bg-red-50 border-red-100 text-red-700"
+                        <button
+                            onClick={onUpload}
+                            disabled={loading || !file}
+                            className={`w-full mt-8 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
+                                loading || !file
+                                    ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                                    : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20 active:scale-[0.98] cursor-pointer"
                             }`}
                         >
-                            {response.type === "success" ? (
-                                <CheckCircleIcon className="w-5 h-5" />
+                            {loading ? (
+                                <>
+                                    <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                                    Processing File...
+                                </>
                             ) : (
-                                <XMarkIcon className="w-5 h-5" />
+                                "Process & Download"
                             )}
-                            <p className="text-sm font-medium">
-                                {response.message}
+                        </button>
+
+                        {response.message && (
+                            <div
+                                className={`mt-6 p-4 rounded-xl border flex items-center gap-3 animate-in slide-in-from-top-2 ${
+                                    response.type === "success"
+                                        ? "bg-green-50 border-green-100 text-green-700"
+                                        : "bg-red-50 border-red-100 text-red-700"
+                                }`}
+                            >
+                                {response.type === "success" ? (
+                                    <CheckCircleIcon className="w-5 h-5" />
+                                ) : (
+                                    <XMarkIcon className="w-5 h-5" />
+                                )}
+                                <p className="text-sm font-medium">
+                                    {response.message}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-6 bg-white border border-zinc-200 rounded-2xl">
+                            <h3 className="font-bold text-zinc-900 mb-2">
+                                How it works
+                            </h3>
+                            <p className="text-zinc-500 text-sm leading-relaxed">
+                                Our document processor scans your spreadsheet,
+                                identifies valid URLs, and applies your
+                                shortening logic instantly. The updated file is
+                                returned automatically without affecting other
+                                data.
                             </p>
                         </div>
-                    )}
-                </div>
-
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-6 bg-white border border-zinc-200 rounded-2xl">
-                        <h3 className="font-bold text-zinc-900 mb-2">
-                            How it works
-                        </h3>
-                        <p className="text-zinc-500 text-sm leading-relaxed">
-                            Our document processor scans your spreadsheet,
-                            identifies valid URLs, and applies your shortening
-                            logic instantly. The updated file is returned
-                            automatically without affecting other data.
-                        </p>
-                    </div>
-                    <div className="p-6 bg-white border border-zinc-200 rounded-2xl">
-                        <h3 className="font-bold text-zinc-900 mb-2">
-                            Coming Soon
-                        </h3>
-                        <p className="text-zinc-500 text-sm leading-relaxed">
-                            Support for PDF files, including advanced parsing
-                            and optical character recognition (OCR), will be
-                            added in an upcoming update.
-                        </p>
+                        <div className="p-6 bg-white border border-zinc-200 rounded-2xl">
+                            <h3 className="font-bold text-zinc-900 mb-2">
+                                Coming Soon
+                            </h3>
+                            <p className="text-zinc-500 text-sm leading-relaxed">
+                                Support for PDF files, including advanced
+                                parsing and optical character recognition (OCR),
+                                will be added in an upcoming update.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            {showUpgradeModal && <UpgradeModal />}
+        </>
     );
 };
 

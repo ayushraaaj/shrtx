@@ -16,8 +16,13 @@ export const createSubscription = asyncHandler(
 
         if (existingSubscription) {
             return res
-                .status(400)
-                .json(new ApiResponse("Subscription already exists", {}));
+                .status(200)
+                .json(
+                    new ApiResponse("Subscription already exists", {
+                        subscriptionId: existingSubscription.subscriptionId,
+                        status: existingSubscription.status,
+                    }),
+                );
         }
 
         const razorpaySubscription = await razorpay.subscriptions.create({
@@ -33,12 +38,27 @@ export const createSubscription = asyncHandler(
             status: "created",
         });
 
-        return res
-            .status(201)
-            .json(
-                new ApiResponse("Subscription added", {
-                    subscriptionId: subscription.subscriptionId,
-                }),
-            );
+        return res.status(201).json(
+            new ApiResponse("Subscription added", {
+                subscriptionId: subscription.subscriptionId,
+            }),
+        );
+    },
+);
+
+export const proSubscription = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+
+        const subscription = await Subscription.findOne({
+            userId,
+            status: "active",
+        });
+
+        if (!subscription) {
+            return res.status(200).json(new ApiResponse("", { isPro: false }));
+        }
+
+        return res.status(200).json(new ApiResponse("", { isPro: true }));
     },
 );
