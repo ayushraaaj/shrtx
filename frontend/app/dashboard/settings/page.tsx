@@ -1,6 +1,6 @@
 "use client";
 
-import CancelSubscription from "@/components/subscription/CancelSubscription";
+import CancelSubscription from "@/components/subscription/ManageSubscription";
 
 const Settings = () => {
     return (

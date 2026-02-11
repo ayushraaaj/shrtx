@@ -23,32 +23,51 @@ export const razorpayWebhook = asyncHandler(
 
         const payload = JSON.parse(rawBody.toString("utf-8"));
 
+        const razorpaySubscription = payload.payload.subscription.entity;
+
         const event = payload.event; // subscription.activated, subscription.cancelled
         console.log("Event:", event);
 
         // console.log("FULL PAYLOAD:", JSON.stringify(payload, null, 2));
 
         if (event === "subscription.activated") {
-            const razorpaySubscriptionId =
-                payload.payload.subscription.entity.id;
-
             await Subscription.findOneAndUpdate(
                 {
-                    subscriptionId: razorpaySubscriptionId,
+                    subscriptionId: razorpaySubscription.id,
                 },
-                { status: "active" },
+                {
+                    status: "active",
+                    currentPeriodEnd: new Date(
+                        razorpaySubscription.current_end * 1000,
+                    ),
+                    cancelScheduled: false,
+                },
             );
         }
 
         if (event === "subscription.cancelled") {
-            const razorpaySubscriptionId =
-                payload.payload.subscription.entity.id;
-
             await Subscription.findOneAndUpdate(
                 {
-                    subscriptionId: razorpaySubscriptionId,
+                    subscriptionId: razorpaySubscription.id,
                 },
-                { status: "cancelled" },
+                {
+                    status: "cancelled",
+                    currentPeriodEnd: null,
+                    cancelScheduled: false,
+                },
+            );
+        }
+
+        if (event === "subscription.updated") {
+            await Subscription.findOneAndUpdate(
+                { subscriptionId: razorpaySubscription.id },
+                {
+                    status: razorpaySubscription.status,
+                    currentPeriodEnd: new Date(
+                        razorpaySubscription.current_end * 1000,
+                    ),
+                    cancelScheduled: razorpaySubscription.has_scheduled_changes,
+                },
             );
         }
 

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { Subscription } from "../models/subscription.model";
 import { ApiResponse } from "../utils/ApiResponse";
@@ -58,7 +58,13 @@ export const proSubscription = asyncHandler(
             return res.status(200).json(new ApiResponse("", { isPro: false }));
         }
 
-        return res.status(200).json(new ApiResponse("", { isPro: true }));
+        return res.status(200).json(
+            new ApiResponse("", {
+                isPro: true,
+                cancelScheduled: subscription.cancelScheduled,
+                currentPeriodEnd: subscription.currentPeriodEnd,
+            }),
+        );
     },
 );
 
@@ -80,5 +86,37 @@ export const cancelSubscription = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("Subscription cancelled", {}));
+    },
+);
+
+export const resumeSubscription = asyncHandler(
+    async (req: Request, res: Response) => {
+        const userId = req.user?._id;
+
+        const subscription = await Subscription.findOne({ userId });
+
+        if (!subscription) {
+            throw new ApiError(404, "No subscription found");
+        }
+
+        if (subscription.status !== "active") {
+            throw new ApiError(
+                400,
+                "Subscription is not active. Please upgrade again.",
+            );
+        }
+
+        if (!subscription.cancelScheduled) {
+            throw new ApiError(
+                400,
+                "Subscription is not scheduled for cancellation.",
+            );
+        }
+
+        await razorpay.subscriptions.cancel(subscription.subscriptionId, 0);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Subscription resumed successfully", {}));
     },
 );

@@ -23,6 +23,13 @@ const subscriptionSchema = new mongoose.Schema(
             default: "created",
             required: true,
         },
+        currentPeriodEnd: {
+            type: Date,
+        },
+        cancelScheduled: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true },
 );
