@@ -28,7 +28,7 @@ export const razorpayWebhook = asyncHandler(
         const event = payload.event; // subscription.activated, subscription.cancelled
         console.log("Event:", event);
 
-        // console.log("FULL PAYLOAD:", JSON.stringify(payload, null, 2));
+        console.log("FULL PAYLOAD:", JSON.stringify(payload, null, 2));
 
         if (event === "subscription.activated") {
             await Subscription.findOneAndUpdate(
