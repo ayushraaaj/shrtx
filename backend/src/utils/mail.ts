@@ -44,7 +44,9 @@ export const sendEmail = async (options: SendEmailOptions) => {
     try {
         await transport.sendMail(mail);
     } catch (error) {
-        throw new Error("Failed to send email");
+        // throw new Error("Failed to send email");
+        console.log(error);
+        throw error;
     }
 };
 
