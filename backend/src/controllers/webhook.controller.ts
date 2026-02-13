@@ -66,7 +66,8 @@ export const razorpayWebhook = asyncHandler(
                     currentPeriodEnd: new Date(
                         razorpaySubscription.current_end * 1000,
                     ),
-                    cancelScheduled: razorpaySubscription.has_scheduled_changes,
+                    
+                    cancelScheduled: razorpaySubscription.cancel_at_cycle_end,
                 },
             );
         }

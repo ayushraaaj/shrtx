@@ -81,7 +81,10 @@ export const cancelSubscription = asyncHandler(
             throw new ApiError(400, "No active subscription found");
         }
 
-        await razorpay.subscriptions.cancel(subscription.subscriptionId, 1);
+        await razorpay.subscriptions.cancel(subscription.subscriptionId, true);
+
+        subscription.cancelScheduled = true;
+        await subscription.save();
 
         return res
             .status(200)
@@ -113,7 +116,10 @@ export const resumeSubscription = asyncHandler(
             );
         }
 
-        await razorpay.subscriptions.cancel(subscription.subscriptionId, 0);
+        await razorpay.subscriptions.cancel(subscription.subscriptionId, false);
+
+        subscription.cancelScheduled = false;
+        await subscription.save();
 
         return res
             .status(200)

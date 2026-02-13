@@ -11,6 +11,7 @@ import { SendEmailOptions } from "../interfaces/SendEmailOptions";
 const transport = nodemailer.createTransport({
     host: BREVO_SMTP_HOST,
     port: Number(BREVO_SMTP_PORT),
+    secure: false,
     auth: {
         user: BREVO_SMTP_USER,
         pass: BREVO_SMTP_PASS,
