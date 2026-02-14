@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import crypto from "crypto";
-import { RAZORPAY_PLAN_ID, RAZORPAY_WEBHOOK_SECRET } from "../config/env";
+import { RAZORPAY_WEBHOOK_SECRET } from "../config/env";
 import { ApiError } from "../utils/ApiError";
 import { Subscription } from "../models/subscription.model";
 import { ApiResponse } from "../utils/ApiResponse";
-import razorpay from "../config/razorpay";
 
 export const razorpayWebhook = asyncHandler(
     async (req: Request, res: Response) => {
@@ -51,49 +50,20 @@ export const razorpayWebhook = asyncHandler(
         }
 
         if (event === "subscription.cancelled") {
-            const subscription = await Subscription.findOne({
-                subscriptionId: razorpaySubscription.id,
-            });
-
-            if (!subscription) {
-                return res
-                    .status(200)
-                    .json(new ApiResponse("Subscription not found", {}));
-            }
-
-            if (subscription?.autoRenew) {
-                console.log(
-                    "Auto-renew triggered. Creating new subscription...",
-                );
-
-                const newSubscription = await razorpay.subscriptions.create({
-                    plan_id: RAZORPAY_PLAN_ID,
-                    customer_notify: 1,
-                    total_count: 120,
-                });
-
-                subscription.subscriptionId = newSubscription.id;
-                subscription.status = "created";
-                subscription.currentPeriodEnd = null;
-                subscription.cancelScheduled = false;
-                subscription.autoRenew = false;
-                await subscription.save({ validateBeforeSave: false });
-
-                return res
-                    .status(200)
-                    .json(
-                        new ApiResponse("Auto-renew subscription created", {}),
-                    );
-            }
-
-            subscription.status = "cancelled";
-            subscription.currentPeriodEnd = null;
-            subscription.cancelScheduled = false;
-            await subscription.save({ validateBeforeSave: false });
+            await Subscription.findOneAndUpdate(
+                {
+                    subscriptionId: razorpaySubscription.id,
+                },
+                {
+                    status: "cancelled",
+                    currentPeriodEnd: null,
+                    cancelScheduled: false,
+                },
+            );
 
             return res
                 .status(200)
-                .json(new ApiResponse("Subscription fully cancelled", {}));
+                .json(new ApiResponse("Subscription is fully cancelled", {}));
         }
     },
 );

@@ -12,18 +12,18 @@ const ManageSubscription = () => {
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const handleResume = async () => {
-        try {
-            setLoading(true);
+    // const handleResume = async () => {
+    //     try {
+    //         setLoading(true);
 
-            await api.post("/subscription/resume");
+    //         await api.post("/subscription/resume");
 
-            await fetchSubscription();
-        } catch (error) {
-        } finally {
-            setLoading(false);
-        }
-    };
+    //         await fetchSubscription();
+    //     } catch (error) {
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handleCancel = async () => {
         const confirmed = window.confirm(
@@ -125,14 +125,6 @@ const ManageSubscription = () => {
                             </span>
                         </p>
                     )}
-
-                    <button
-                        onClick={handleResume}
-                        disabled={loading}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                    >
-                        {loading ? "Processing..." : "Resume Subscription"}
-                    </button>
                 </>
             )}
         </div>

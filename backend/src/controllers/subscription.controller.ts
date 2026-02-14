@@ -92,36 +92,36 @@ export const cancelSubscription = asyncHandler(
     },
 );
 
-export const resumeSubscription = asyncHandler(
-    async (req: Request, res: Response) => {
-        const userId = req.user?._id;
+// export const resumeSubscription = asyncHandler(
+//     async (req: Request, res: Response) => {
+//         const userId = req.user?._id;
 
-        const subscription = await Subscription.findOne({ userId });
+//         const subscription = await Subscription.findOne({ userId });
 
-        if (!subscription) {
-            throw new ApiError(404, "No subscription found");
-        }
+//         if (!subscription) {
+//             throw new ApiError(404, "No subscription found");
+//         }
 
-        if (subscription.status !== "active") {
-            throw new ApiError(
-                400,
-                "Subscription is not active. Please upgrade again.",
-            );
-        }
+//         if (subscription.status !== "active") {
+//             throw new ApiError(
+//                 400,
+//                 "Subscription is not active. Please upgrade again.",
+//             );
+//         }
 
-        if (!subscription.cancelScheduled) {
-            throw new ApiError(
-                400,
-                "Subscription is not scheduled for cancellation.",
-            );
-        }
+//         if (!subscription.cancelScheduled) {
+//             throw new ApiError(
+//                 400,
+//                 "Subscription is not scheduled for cancellation.",
+//             );
+//         }
 
-        subscription.cancelScheduled = false;
-        subscription.autoRenew = true;
-        await subscription.save();
+//         subscription.cancelScheduled = false;
+//         subscription.autoRenew = true;
+//         await subscription.save();
 
-        return res
-            .status(200)
-            .json(new ApiResponse("Subscription resumed successfully", {}));
-    },
-);
+//         return res
+//             .status(200)
+//             .json(new ApiResponse("Subscription resumed successfully", {}));
+//     },
+// );
