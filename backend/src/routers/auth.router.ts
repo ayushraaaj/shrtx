@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    authMe,
     loginUser,
     logoutUser,
     signupUser,
@@ -18,5 +19,6 @@ router.route("/verifyemail").post(verifyUserEmail);
 router.use(verifyJWT);
 
 router.route("/logout").post(logoutUser);
+router.route("/me").get(authMe);
 
 export default router;

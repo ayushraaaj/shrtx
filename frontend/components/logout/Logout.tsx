@@ -1,4 +1,4 @@
-import { useLogout } from "@/lib/useLogout";
+import { useLogout } from "@/app/hooks/useLogout";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/react/20/solid";
 
 interface Props {

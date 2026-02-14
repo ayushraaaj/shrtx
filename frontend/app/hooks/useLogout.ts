@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { api } from "./axios";
+import { api } from "../../lib/axios";
 
 export const useLogout = () => {
     const router = useRouter();
@@ -10,7 +10,7 @@ export const useLogout = () => {
             const res = await api.post("/auth/logout");
 
             router.replace("/login");
-            
+
             return { message: res.data.message };
         } catch (error) {
             if (axios.isAxiosError(error)) {

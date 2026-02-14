@@ -8,6 +8,12 @@ import { emailVerificationMailgenContent, sendEmail } from "../utils/mail";
 import { IUser } from "../interfaces/IUser";
 import { CLIENT_URL } from "../config/env";
 
+export const authMe = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+
+    return res.status(200).json(new ApiResponse("User authenticated", {}));
+});
+
 const generateAccessAndRefreshToken = async (user: IUser) => {
     try {
         const accessToken = await user.generateAccessToken();

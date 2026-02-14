@@ -4,8 +4,11 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCheckAuth } from "../hooks/useCheckAuth";
 
 const Signup = () => {
+    useCheckAuth();
+
     const router = useRouter();
 
     const [buttonDisabled, setButtonDisabled] = useState(true);
