@@ -30,6 +30,10 @@ const subscriptionSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        autoRenew: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true },
 );

@@ -116,9 +116,8 @@ export const resumeSubscription = asyncHandler(
             );
         }
 
-        await razorpay.subscriptions.cancel(subscription.subscriptionId, false);
-
         subscription.cancelScheduled = false;
+        subscription.autoRenew = true;
         await subscription.save();
 
         return res
