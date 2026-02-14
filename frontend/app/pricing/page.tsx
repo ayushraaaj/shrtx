@@ -3,11 +3,21 @@ import { api } from "@/lib/axios";
 import { loadRazorpay } from "@/utils/loadRazorpay";
 import { useEffect, useState } from "react";
 
+interface RazorpayResponse {
+    razorpay_payment_id: string;
+    razorpay_subscription_id: string;
+    razorpay_signature: string;
+}
+
 const PricingPage = () => {
-    const [waitingForActivation, setWaitingForActivation] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [processing, setProcessing] = useState(false);
+    const [checking, setChecking] = useState(true);
 
     const handleUpgrade = async () => {
         try {
+            setLoading(true);
+
             const loaded = await loadRazorpay();
 
             if (!loaded) {
@@ -20,7 +30,7 @@ const PricingPage = () => {
             const { subscriptionId, status } = res.data.data;
 
             if (status === "active") {
-                window.location.href = "/dashboard/document";
+                window.location.href = "/dashboard/settings";
                 return;
             }
 
@@ -31,30 +41,65 @@ const PricingPage = () => {
                 subscription_id: subscriptionId,
                 name: "Shrtx",
                 description: "PRO Subscription",
+
+                handler: async function (response: RazorpayResponse) {
+                    console.log("Payment successful", response);
+
+                    setProcessing(true);
+
+                    let attempts = 0;
+
+                    const interval = setInterval(async () => {
+                        attempts++;
+
+                        try {
+                            const res = await api.get("/subscription/me");
+
+                            if (res.data.data.isPro || attempts > 10) {
+                                clearInterval(interval);
+                                window.location.href = "/dashboard/settings";
+                            }
+                        } catch (error) {
+                            clearInterval(interval);
+                            window.location.href = "/dashboard/settings";
+                        }
+                    }, 1500);
+                },
             });
 
-            console.log("Resume payment", subscriptionId);
-
             razorpay.open();
-        } catch (error) {}
+        } catch (error) {
+            console.error("Upgrade error:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    useEffect(() => {
-        if (!waitingForActivation) {
-            return;
-        }
-
-        const interval = setInterval(async () => {
+    const checkProStatus = async () => {
+        try {
             const res = await api.get("/subscription/me");
 
             if (res.data.data.isPro) {
-                clearInterval(interval);
-                window.location.href = "/dashboard/document";
+                window.location.href = "/dashboard/settings";
             }
-        }, 2000);
+        } catch (error) {
+            console.error("Error checking subscription", error);
+        } finally {
+            setChecking(false);
+        }
+    };
 
-        return () => clearInterval(interval);
-    }, [waitingForActivation]);
+    useEffect(() => {
+        checkProStatus();
+    }, []);
+
+    if (checking) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-gray-500">Checking subscription status...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto py-16">
@@ -77,16 +122,15 @@ const PricingPage = () => {
                 <button
                     onClick={handleUpgrade}
                     className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700"
+                    disabled={loading || processing}
                 >
-                    Upgrade Now
+                    {processing
+                        ? "Redirecting..."
+                        : loading
+                          ? "Opening Payment..."
+                          : "Upgrade Now"}
                 </button>
             </div>
-
-            {waitingForActivation && (
-                <p className="mt-4 text-blue-600 font-medium">
-                    Payment successful. Activating PRO...
-                </p>
-            )}
         </div>
     );
 };
