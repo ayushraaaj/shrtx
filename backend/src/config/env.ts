@@ -33,6 +33,8 @@ export const BREVO_SMTP_PORT = getEnv("BREVO_SMTP_PORT");
 export const BREVO_SMTP_USER = getEnv("BREVO_SMTP_USER");
 export const BREVO_SMTP_PASS = getEnv("BREVO_SMTP_PASS");
 
+export const BREVO_API_KEY = getEnv("BREVO_API_KEY");
+
 export const CLIENT_URL = getEnv("CLIENT_URL");
 export const BACKEND_URL = getEnv("BACKEND_URL");
 

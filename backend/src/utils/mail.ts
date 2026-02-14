@@ -1,22 +1,24 @@
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 import {
+    BREVO_API_KEY,
     BREVO_SMTP_HOST,
     BREVO_SMTP_PASS,
     BREVO_SMTP_PORT,
     BREVO_SMTP_USER,
 } from "../config/env";
 import { SendEmailOptions } from "../interfaces/SendEmailOptions";
+import axios from "axios";
 
-const transport = nodemailer.createTransport({
-    host: BREVO_SMTP_HOST,
-    port: Number(BREVO_SMTP_PORT),
-    secure: false,
-    auth: {
-        user: BREVO_SMTP_USER,
-        pass: BREVO_SMTP_PASS,
-    },
-});
+// const transport = nodemailer.createTransport({
+//     host: BREVO_SMTP_HOST,
+//     port: Number(BREVO_SMTP_PORT),
+//     secure: false,
+//     auth: {
+//         user: BREVO_SMTP_USER,
+//         pass: BREVO_SMTP_PASS,
+//     },
+// });
 
 export const sendEmail = async (options: SendEmailOptions) => {
     const mailGenerator = new Mailgen({
@@ -32,20 +34,45 @@ export const sendEmail = async (options: SendEmailOptions) => {
     );
     const emailHtml = mailGenerator.generate(options.mailgenContent);
 
-    const mail = {
-        // from: "mail.taskmanager@projectmanagement.pgm",
-        from: '"Shrtx" <ayushrajar000@gmail.com>',
-        to: options.email,
-        subject: options.subject,
-        text: emailTextual,
-        html: emailHtml,
-    };
+    // const mail = {
+    //     // from: "mail.taskmanager@projectmanagement.pgm",
+    //     from: '"Shrtx" <ayushrajar000@gmail.com>',
+    //     to: options.email,
+    //     subject: options.subject,
+    //     text: emailTextual,
+    //     html: emailHtml,
+    // };
+
+    // try {
+    //     await transport.sendMail(mail);
+    // } catch (error) {
+    //     // throw new Error("Failed to send email");
+    //     console.log(error);
+    //     throw error;
+    // }
 
     try {
-        await transport.sendMail(mail);
+        await axios.post(
+            "https://api.brevo.com/v3/smtp/email",
+            {
+                sender: {
+                    name: "Shrtx",
+                    email: "ayushrajar000@gmail.com",
+                },
+                to: [{ email: options.email }],
+                subject: options.subject,
+                htmlContent: emailHtml,
+                textContent: emailTextual,
+            },
+            {
+                headers: {
+                    "api-key": BREVO_API_KEY,
+                    "Content-Type": "application/json",
+                },
+            },
+        );
     } catch (error) {
-        // throw new Error("Failed to send email");
-        console.log(error);
+        console.error("Brevo API Error:", error);
         throw error;
     }
 };
