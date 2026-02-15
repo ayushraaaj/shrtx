@@ -7,8 +7,6 @@ import { useEffect, useState } from "react";
 import { useCheckAuth } from "../hooks/useCheckAuth";
 
 const Login = () => {
-    useCheckAuth();
-
     const router = useRouter();
 
     const [user, setUser] = useState({ username_email: "", password: "" });

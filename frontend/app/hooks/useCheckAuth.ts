@@ -1,6 +1,7 @@
+"use client";
 import { api } from "@/lib/axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export const useCheckAuth = () => {
     const router = useRouter();
@@ -8,8 +9,9 @@ export const useCheckAuth = () => {
     const verifyAuth = async () => {
         try {
             await api.get("/auth/me");
-            router.replace("/dashboard");
-        } catch (error) {}
+        } catch (error) {
+            router.replace("/login");
+        }
     };
 
     useEffect(() => {

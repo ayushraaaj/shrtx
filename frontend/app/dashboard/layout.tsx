@@ -1,6 +1,10 @@
+"use client";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { useCheckAuth } from "../hooks/useCheckAuth";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+    useCheckAuth();
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />

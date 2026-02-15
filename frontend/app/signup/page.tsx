@@ -7,8 +7,6 @@ import { useEffect, useState } from "react";
 import { useCheckAuth } from "../hooks/useCheckAuth";
 
 const Signup = () => {
-    useCheckAuth();
-
     const router = useRouter();
 
     const [buttonDisabled, setButtonDisabled] = useState(true);
