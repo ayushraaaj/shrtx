@@ -10,7 +10,8 @@ import {
     sendEmail,
 } from "../utils/mail";
 import { IUser } from "../interfaces/IUser";
-import { CLIENT_URL } from "../config/env";
+import { CLIENT_URL, REFRESH_TOKEN_SECRET } from "../config/env";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (user: IUser) => {
     try {
@@ -106,17 +107,12 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
         sameSite: "none" as const,
     };
 
-    return res
-        .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .json(
-            new ApiResponse("Login successful", {
-                loggedInUser,
-                accessToken,
-                refreshToken,
-            }),
-        );
+    return res.status(200).cookie("refreshToken", refreshToken, options).json(
+        new ApiResponse("Login successful", {
+            loggedInUser,
+            accessToken,
+        }),
+    );
 });
 
 export const verifyUserEmail = asyncHandler(
@@ -222,5 +218,49 @@ export const setForgotPassword = asyncHandler(
         return res
             .status(200)
             .json(new ApiResponse("Password reset successful", {}));
+    },
+);
+
+export const refreshToken = asyncHandler(
+    async (req: Request, res: Response) => {
+        const refreshToken = req.cookies?.refreshToken;
+
+        if (!refreshToken) {
+            throw new ApiError(401, "Refresh token is missing");
+        }
+
+        let decodedToken;
+
+        try {
+            decodedToken = jwt.verify(
+                refreshToken,
+                REFRESH_TOKEN_SECRET,
+            ) as JwtPayload;
+        } catch (error) {
+            throw new ApiError(401, "Invalid or expired refresh token");
+        }
+
+        const user = await User.findById(decodedToken?._id);
+        if (!user) {
+            throw new ApiError(401, "Invalid or expired refresh token");
+        }
+
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+            await generateAccessAndRefreshToken(user);
+
+        const options = {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none" as const,
+            path: "/api/v1/auth/refresh-token",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        };
+
+        return res
+            .status(200)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(
+                new ApiResponse("Access token refreshed", { newAccessToken }),
+            );
     },
 );

@@ -1,5 +1,7 @@
 "use client";
+import PublicRoute from "@/components/PublicRoute";
 import { api } from "@/lib/axios";
+import { setAccessToken } from "@/utils/auth";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,11 +19,15 @@ const Login = () => {
         try {
             setLoading(true);
             setResponse("");
+
             const res = await api.post("/auth/login", user);
+
+            setAccessToken(res.data.data.newAccessToken);
+
             setResponse(res.data.message);
 
             setTimeout(() => {
-                router.push("/dashboard");
+                router.replace("/dashboard");
             }, 1000);
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -45,6 +51,7 @@ const Login = () => {
     }, [user]);
 
     return (
+        <PublicRoute>
         <div className="min-h-screen bg-zinc-50 flex flex-col justify-center items-center px-4">
             <Link href="/" className="mb-8 text-2xl font-bold text-blue-600">
                 shrtx<span className="text-zinc-400">.</span>
@@ -154,6 +161,7 @@ const Login = () => {
                 </div>
             </div>
         </div>
+        </PublicRoute>
     );
 };
 

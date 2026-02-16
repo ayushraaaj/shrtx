@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { api } from "../../lib/axios";
+import { setAccessToken } from "@/utils/auth";
 
 export const useLogout = () => {
     const router = useRouter();
@@ -8,8 +9,6 @@ export const useLogout = () => {
     const logout = async () => {
         try {
             const res = await api.post("/auth/logout");
-
-            router.replace("/login");
 
             return { message: res.data.message };
         } catch (error) {
@@ -21,6 +20,10 @@ export const useLogout = () => {
             } else {
                 return { message: "Unexpected error" };
             }
+        } finally {
+            setAccessToken(null);
+
+            router.replace("/login");
         }
     };
     return logout;

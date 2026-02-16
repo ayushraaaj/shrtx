@@ -4,6 +4,7 @@ import {
     forgotPassword,
     loginUser,
     logoutUser,
+    refreshToken,
     setForgotPassword,
     signupUser,
     verifyUserEmail,
@@ -20,6 +21,7 @@ router.route("/verifyemail").post(verifyUserEmail);
 
 router.route("/forgot-password").post(forgotPassword);
 router.route("/forgot-password/set").post(setForgotPassword);
+router.route("/refresh-token").post(refreshToken);
 
 router.use(verifyJWT);
 
