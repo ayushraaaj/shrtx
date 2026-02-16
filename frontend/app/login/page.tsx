@@ -22,7 +22,7 @@ const Login = () => {
 
             const res = await api.post("/auth/login", user);
 
-            setAccessToken(res.data.data.newAccessToken);
+            setAccessToken(res.data.data.accessToken);
 
             setResponse(res.data.message);
 

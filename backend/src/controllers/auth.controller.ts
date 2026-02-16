@@ -105,6 +105,8 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
         httpOnly: true,
         secure: true,
         sameSite: "none" as const,
+        path: "/api/v1/auth/refresh-token",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     };
 
     return res.status(200).cookie("refreshToken", refreshToken, options).json(
@@ -152,7 +154,6 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
 
     return res
         .status(200)
-        .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
         .json(new ApiResponse("Logout successful", {}));
 });
@@ -241,12 +242,14 @@ export const refreshToken = asyncHandler(
         }
 
         const user = await User.findById(decodedToken?._id);
-        if (!user) {
+        if (!user || user.refreshToken !== refreshToken) {
             throw new ApiError(401, "Invalid or expired refresh token");
         }
 
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-            await generateAccessAndRefreshToken(user);
+        // const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+        //     await generateAccessAndRefreshToken(user);
+
+        const newAccessToken = await user.generateAccessToken();
 
         const options = {
             httpOnly: true,
@@ -256,11 +259,15 @@ export const refreshToken = asyncHandler(
             maxAge: 7 * 24 * 60 * 60 * 1000,
         };
 
-        return res
-            .status(200)
-            .cookie("refreshToken", newRefreshToken, options)
-            .json(
-                new ApiResponse("Access token refreshed", { newAccessToken }),
-            );
+        return (
+            res
+                .status(200)
+                // .cookie("refreshToken", newRefreshToken, options)
+                .json(
+                    new ApiResponse("Access token refreshed", {
+                        newAccessToken,
+                    }),
+                )
+        );
     },
 );
