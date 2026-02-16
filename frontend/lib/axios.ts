@@ -6,6 +6,11 @@ export const api = axios.create({
     withCredentials: true,
 });
 
+export const refreshApi = axios.create({
+    baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1`,
+    withCredentials: true,
+});
+
 // Request Interceptor: attaching bearer token to every outgoing request
 api.interceptors.request.use(
     (config) => {
@@ -32,7 +37,7 @@ api.interceptors.response.use(
             // window.location.href = "/login";
 
             try {
-                const res = await api.post("/auth/refresh-token");
+                const res = await refreshApi.post("/auth/refresh-token");
 
                 setAccessToken(res.data.data.accessToken);
 

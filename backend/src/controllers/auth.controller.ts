@@ -150,6 +150,8 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
         httpOnly: true,
         secure: true,
         sameSite: "none" as const,
+        maxAge: 0,
+        path: "/api/v1/auth/refresh-token",
     };
 
     return res
@@ -246,10 +248,10 @@ export const refreshToken = asyncHandler(
             throw new ApiError(401, "Invalid or expired refresh token");
         }
 
-        // const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-        //     await generateAccessAndRefreshToken(user);
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+            await generateAccessAndRefreshToken(user);
 
-        const newAccessToken = await user.generateAccessToken();
+        // const newAccessToken = await user.generateAccessToken();
 
         const options = {
             httpOnly: true,
@@ -259,15 +261,13 @@ export const refreshToken = asyncHandler(
             maxAge: 7 * 24 * 60 * 60 * 1000,
         };
 
-        return (
-            res
-                .status(200)
-                // .cookie("refreshToken", newRefreshToken, options)
-                .json(
-                    new ApiResponse("Access token refreshed", {
-                        newAccessToken,
-                    }),
-                )
-        );
+        return res
+            .status(200)
+            .cookie("refreshToken", newRefreshToken, options)
+            .json(
+                new ApiResponse("Access token refreshed", {
+                    newAccessToken,
+                }),
+            );
     },
 );
