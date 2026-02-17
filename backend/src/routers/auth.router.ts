@@ -20,7 +20,7 @@ router.route("/login").post(loginValidator(), validate, loginUser);
 router.route("/verifyemail").post(verifyUserEmail);
 
 router.route("/forgot-password").post(forgotPassword);
-router.route("/forgot-password/set").post(setForgotPassword);
+router.route("/reset-password").post(setForgotPassword);
 router.route("/refresh-token").post(refreshToken);
 
 router.use(verifyJWT);

@@ -11,6 +11,14 @@ export const refreshApi = axios.create({
     withCredentials: true,
 });
 
+const authRoutes = [
+    "/auth/login",
+    "/auth/signup",
+    "/auth/refresh-token",
+    "/auth/forgot-password",
+    "/reset-password",
+];
+
 // Request Interceptor: attaching bearer token to every outgoing request
 api.interceptors.request.use(
     (config) => {
@@ -32,9 +40,16 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const isAuthRoute = authRoutes.some((route) =>
+            originalRequest.url.includes(route),
+        );
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isAuthRoute
+        ) {
             originalRequest._retry = true;
-            // window.location.href = "/login";
 
             try {
                 const res = await refreshApi.post("/auth/refresh-token");

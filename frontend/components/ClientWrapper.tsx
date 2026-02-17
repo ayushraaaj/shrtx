@@ -1,5 +1,5 @@
 "use client";
-import { api } from "@/lib/axios";
+import { api, refreshApi } from "@/lib/axios";
 import { setAccessToken } from "@/utils/auth";
 import { useEffect, useState } from "react";
 
@@ -8,7 +8,7 @@ const ClientWrapper = ({ children }: { children: React.ReactNode }) => {
 
     const refresh = async () => {
         try {
-            const res = await api.post("/auth/refresh-token");
+            const res = await refreshApi.post("/auth/refresh-token");
 
             setAccessToken(res.data.data.newAccessToken);
         } catch (error) {
