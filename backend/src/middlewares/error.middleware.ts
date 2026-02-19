@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import mongoose from "mongoose";
+import { NODE_ENV } from "../config/env";
 
 export const errorHandler = (
     err: Error | ApiError,
@@ -23,7 +24,7 @@ export const errorHandler = (
         message: apiError.message,
         data: null,
         errors: apiError.errors,
-        ...(process.env.NODE_ENV === "development" && {
+        ...(NODE_ENV === "development" && {
             stack: apiError.stack,
         }),
     };
