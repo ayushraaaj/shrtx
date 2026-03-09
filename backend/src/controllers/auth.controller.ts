@@ -251,8 +251,6 @@ export const refreshToken = asyncHandler(
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
             await generateAccessAndRefreshToken(user);
 
-        // const newAccessToken = await user.generateAccessToken();
-
         const options = {
             httpOnly: true,
             secure: true,

@@ -34,7 +34,7 @@ const Analytics = (props: Props) => {
     const [exporting, setExporting] = useState(false);
 
     const captureChart = async (
-        chartRef: React.RefObject<HTMLDivElement | null>
+        chartRef: React.RefObject<HTMLDivElement | null>,
     ) => {
         if (!chartRef.current) {
             throw new Error("Chart not found");
@@ -65,7 +65,7 @@ const Analytics = (props: Props) => {
                 },
                 {
                     responseType: "blob",
-                }
+                },
             );
 
             const blob = new Blob([res.data], {
@@ -103,7 +103,7 @@ const Analytics = (props: Props) => {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 setError(
-                    error.response?.data.message ?? "Something went wrong"
+                    error.response?.data.message ?? "Something went wrong",
                 );
             } else {
                 setError("Unexpected error");
@@ -142,7 +142,10 @@ const Analytics = (props: Props) => {
                             <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/20">
                                 <ChartBarIcon className="w-5 h-5 text-white" />
                             </div>
-                            <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight" title={ groupName}>
+                            <h1
+                                className="text-3xl font-extrabold text-zinc-900 tracking-tight"
+                                title={groupName}
+                            >
                                 {heading}{" "}
                                 {groupName && `(${truncate(groupName, 40)})`}
                             </h1>

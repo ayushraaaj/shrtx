@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/axios";
 import { useState, useEffect } from "react";
 
 interface Props {
@@ -18,7 +19,7 @@ const ExportModal = (props: Props) => {
         if (error) setError("");
     }, [customValue, exportOption]);
 
-    const handleExport = () => {
+    const handleExport = async () => {
         let limit = exportOption;
 
         if (exportOption === "custom") {
@@ -29,11 +30,32 @@ const ExportModal = (props: Props) => {
             limit = customValue;
         }
 
-        const timestamp = Date.now();
+        // window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/url/export?limit=${limit}&type=${fileType}&t=${timestamp}`;
 
-        window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/url/export?limit=${limit}&type=${fileType}&t=${timestamp}`;
+        try {
+            const res = await api.get("url/export", {
+                params: { limit, type: fileType, timestamp: Date.now() },
 
-        onCloseModal();
+                responseType: "blob",
+            });
+
+            const blob = new Blob([res.data]);
+
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `urls-export.${fileType}`;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+
+            onCloseModal();
+        } catch (error) {
+            console.error("Failed to export analytics", error);
+        }
     };
 
     return (
